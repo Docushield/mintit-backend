@@ -7,6 +7,10 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
+        match: [
+            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 
+            'Please fill a valid email address'
+        ]
     },
     password: {
         type: String,
@@ -22,5 +26,5 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     }
-});
+},{ timestamps: true });
 module.exports = mongoose.model('user', userSchema);

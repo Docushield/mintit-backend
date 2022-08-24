@@ -16,14 +16,13 @@ mongoose.connect(mongoDBURI,{
 .then(() => 
     console.log("DB Connected!")
 );
-app.use(expressSession({
-    secret: "random",
-    resave: true,
-    saveUninitialized: true,
-    // setting the max age to longer duration
-    maxAge: 24 * 60 * 60 * 1000,
-    store: new MemoryStore(),
-}));
+app.use(expressSession(
+    { 
+        secret: 'keyboard cat', 
+        cookie: { maxAge: 60000 }
+    }
+))
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.listen(8000,()=>{

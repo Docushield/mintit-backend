@@ -5,16 +5,18 @@ module.exports = function (passport) {
     passport.use(new GoogleStrategy({
         clientID:authConfig.clientIDForOAuth,
         clientSecret:authConfig.clientSecretForOAuth,
-        callbackURL:authConfig.callBackUrlForOAuth,
-    }, (accessToken, refreshToken, profile, done) => {
-        console.log(profile._json);
+        callbackURL:authConfig.callBackUrlForOAuth
+    },(accessToken, refreshToken, profile, done) => {
+        var alreadyExist=false;
         // find if a user exist with this email or not
-        user.findOne({ email: profile.emails[0].value }).then((data) => {
+        user.findOne({ email: profile.emails[0].value }).then((data) => 
+        {
             if (data) {
-                // user exists
-                // update data
+                // user exists, update data
                 // I am skipping that part here, may Update Later
-                return done(null, data);
+                alreadyExist=true;
+                console.log("data",data);
+                return done(alreadyExist, data);
             } else {
                 // create a user
                 user({
@@ -25,19 +27,11 @@ module.exports = function (passport) {
                     provider: 'google',
                     isVerified: true,
                 }).save(function (err, data) {
-                    return done(null, data);
+                    console.log("save data");
+                    return done(alreadyExist, data);
                 });
-            }
+            }    
         });
     }
     ));
-    passport.serializeUser(function (user, done) {
-        done(null, user.id);
-    });
-
-    passport.deserializeUser(function (id, done) {
-        user.findById(id, function (err, user) {
-            done(err, user);
-        });
-    });
 }
