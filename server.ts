@@ -1,8 +1,12 @@
 // Importing module
 import express from 'express';
+import { loginRouter } from './routes';
 
 const app = express();
 const PORT:Number=3000;
+
+app.use('/api/auth', express.json());
+app.use('/api/auth', loginRouter);
 
 // Handling GET / Request
 app.get('/', (req, res) => {
