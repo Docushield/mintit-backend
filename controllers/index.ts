@@ -1,7 +1,7 @@
-import {login, logout} from './Login/Login';
+import {LoginController} from './Login/Login';
 
+const loginController = new LoginController ();
 export
 {
-  login
-, logout
+  loginController
 };
