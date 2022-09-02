@@ -11,8 +11,8 @@ RUN npm run build
 FROM node:16.17.0-alpine
 WORKDIR /usr
 COPY package.json ./
-RUN npm install --only=production
+RUN npm install
 COPY --from=0 /usr/dist .
-RUN npm install pm2 -g
+RUN npm install pm2 pg -g
 EXPOSE 80
-CMD ["pm2-runtime","server.js"]
+CMD ["node", "server.js"]

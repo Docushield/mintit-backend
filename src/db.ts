@@ -7,7 +7,7 @@ export const connect = () => {
     const userName = process.env.USER || "cloud";
     const password = process.env.PASSWORD;
     const database = process.env.DB || "db";
-    const dialect: any = process.env.DIALECT;
+    const dialect = 'postgres';
 
     console.log('dialect  ', dialect)
 
