@@ -1,5 +1,7 @@
 import { Sequelize } from 'sequelize-typescript'
-import { AuthTokens } from './models/authtoken';
+import { AuthToken } from './models/authtoken';
+import { Collection } from './models/collection';
+import { NFT } from './models/nft';
 
 export const connect = () => {
 
@@ -20,13 +22,13 @@ export const connect = () => {
         repositoryMode: true,
         pool: {
             max: 10,
-            min: 0,
+            min: 1,
             acquire: 20000,
             idle: 5000
         }
     });
 
-    sequelize.addModels([AuthTokens]);
+    sequelize.addModels([AuthToken, Collection, NFT]);
 
     const db: any = {};
     db.Sequelize = Sequelize;

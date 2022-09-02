@@ -1,15 +1,15 @@
-import { Table, Column, Model, Default, HasMany, PrimaryKey } from 'sequelize-typescript'
+import { Table, Column, Model, Default, HasMany, PrimaryKey, DataType } from 'sequelize-typescript'
 import { v4 as uuidv4 } from 'uuid';
 
 @Table({
   tableName: 'collections'
 })
-export class Collections extends Model {
+export class Collection extends Model {
 
   @PrimaryKey
   @Default(uuidv4())
   @Column
-  id: number
+  id: string
 
   @Column
   creator: string
@@ -23,27 +23,43 @@ export class Collections extends Model {
   @Column
   type: string
 
-  @Column({field: 'provenance-hash'})
-  provenanceHash: string
+  @Column
+  "provenance-hash": string
 
-  @Column({field: 'mint-starts'})
-  mintStarts: Date
+  @Column
+  "mint-starts": Date
 
-  @Column({field: 'premint-ends'})
-  premintEnds: Date
+  @Column
+  "premint-ends": Date
 
-  @Column({field: 'premint-whitelist'})
-  premintWhitelist: [string]
+  @Column(DataType.ARRAY(DataType.STRING))
+  "premint-whitelist": [string]
 
   @Column
   size: number
 
-  @Column({field: 'mint-price'})
-  mintPrice: number
+  @Column
+  "mint-price": number
 
-  @Column({field: 'token-list'})
-  tokenList: [string]
+  @Column(DataType.ARRAY(DataType.STRING))
+  "token-list": [string]
 
   @Column
   createdAt: string;
+
+  @Column(DataType.ARRAY(DataType.JSONB))
+  "mint-royalities": [object]
+
+  @Column(DataType.ARRAY(DataType.JSONB))
+  "sale-royalities": [object]
+
+  @Column(DataType.ARRAY(DataType.JSONB))
+  tokens: [object];
+}
+
+type MintRoyalties = {
+  description: string
+  stakeholder: string
+  "stakeholder-guard": object
+  rate: number
 }

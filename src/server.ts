@@ -1,12 +1,15 @@
 // Importing module
 import express from 'express';
-import { loginRouter } from './routes';
+import * as bodyParser from "body-parser";
+import { loginRouter, collectionRouter } from './routes';
 
 const app = express();
 const PORT:Number=3000;
 
-app.use('/api/auth', express.json());
+app.use(bodyParser.json());
+
 app.use('/api/auth', loginRouter);
+app.use('/api/collection', collectionRouter);
 
 // Handling GET / Request
 app.get('/', (req, res) => {

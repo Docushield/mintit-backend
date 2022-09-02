@@ -2,14 +2,14 @@ import { Table, Column, Model, HasMany, CreatedAt, PrimaryKey, Default } from 's
 import { v4 as uuidv4 } from 'uuid';
 
 @Table({
-  tableName: 'authToken'
+  tableName: 'authTokens'
 })
-export class AuthTokens extends Model {
+export class AuthToken extends Model {
 
   @PrimaryKey
   @Default(uuidv4())
   @Column
-  id: number
+  id: string
 
   @Column
   token: string

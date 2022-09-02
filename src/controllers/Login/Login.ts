@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { TypedRequestBody } from '../../express';
 import { APILogger } from '../../logger/api';
 import { AuthTokenRepository } from '../../repository/authtoken';
-import { AuthTokens } from '../../models/authtoken';
+import { AuthToken } from '../../models/authtoken';
 
 export class LoginController {
   private authTokenRespository: AuthTokenRepository;
@@ -13,7 +13,7 @@ export class LoginController {
         this.logger = new APILogger()
     }
 
-    async createAuthToken(authToken: AuthTokens) {
+    async createAuthToken(authToken: AuthToken) {
         this.logger.info('Controller: createAuthToken', authToken);
         return await this.authTokenRespository.createToken(authToken);
     }

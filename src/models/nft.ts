@@ -1,12 +1,18 @@
-import { Table, Column, Model, HasMany, DataType, ForeignKey } from 'sequelize-typescript'
-import { Collections } from './collection'
+import { Collection } from './collection'
+import { Table, Column, Model, Default, HasMany, PrimaryKey, DataType, ForeignKey } from 'sequelize-typescript'
+import { v4 as uuidv4 } from 'uuid';
 
 @Table({
-  tableName: 'nft'
+  tableName: 'nfts'
 })
 export class NFT extends Model {
 
-  @ForeignKey (() => Collections)
+  @PrimaryKey
+  @Default(uuidv4())
+  @Column
+  id: string
+
+  @ForeignKey (() => Collection)
   @Column
   collection_id: number
 

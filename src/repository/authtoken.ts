@@ -1,6 +1,6 @@
 import { connect } from "../db";
 import { APILogger } from '../logger/api';
-import { AuthTokens } from "../models/authtoken";
+import { AuthToken } from "../models/authtoken";
 
 export class AuthTokenRepository {
 
@@ -10,15 +10,11 @@ export class AuthTokenRepository {
 
     constructor() {
         this.db = connect();
-        // For Development
-        this.db.sequelize.sync({ force: true }).then(() => {
-            console.log("Drop and re-sync db.");
-        });
-        this.authTokenRespository = this.db.sequelize.getRepository(AuthTokens);
+        this.authTokenRespository = this.db.sequelize.getRepository(AuthToken);
         this.logger = new APILogger();
     }
 
-    async createToken(authToken: AuthTokens) {
+    async createToken(authToken: AuthToken) {
         let data = {};
         try {
             authToken.createdAt = new Date().toISOString();
