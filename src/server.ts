@@ -9,7 +9,7 @@ const PORT:Number=3000;
 app.use(bodyParser.json());
 
 app.use('/api/auth', loginRouter);
-app.use('/api/collection', collectionRouter);
+app.use('/api/collections', collectionRouter);
 
 // Handling GET / Request
 app.get('/', (req, res) => {

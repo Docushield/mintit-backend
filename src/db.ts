@@ -5,10 +5,10 @@ import { NFT } from './models/nft';
 
 export const connect = () => {
 
-    const hostName = process.env.HOST;
-    const userName = process.env.USER || "cloud";
-    const password = process.env.PASSWORD;
-    const database = process.env.DB || "db";
+    const hostName = process.env.HOST || 'localhost';
+    const userName = process.env.USER || "galactus";
+    const password = process.env.PASSWORD || 'galactus';
+    const database = process.env.DB || "galactusdb";
     const dialect = 'postgres';
 
     console.log('dialect  ', dialect)
