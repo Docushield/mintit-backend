@@ -14,10 +14,10 @@ export class AuthTokenRepository {
         this.logger = new APILogger();
     }
 
-    async createToken(authToken: AuthToken) {
+    async createToken(authToken: {account: string, token: string}) {
         let data = {};
         try {
-            authToken.createdAt = new Date().toISOString();
+            authToken["createdAt"] = new Date().toISOString();
             data = await this.authTokenRespository.create(authToken);
         } catch(err) {
             this.logger.error('Error::' + err);
