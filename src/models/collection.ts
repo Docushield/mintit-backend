@@ -1,5 +1,4 @@
-import { Table, Column, Model, Default, HasMany, PrimaryKey, DataType } from 'sequelize-typescript'
-import { v4 as uuidv4 } from 'uuid';
+import { CreatedAt, Table, Column, Model, Default, HasMany, PrimaryKey, DataType } from 'sequelize-typescript'
 
 @Table({
   tableName: 'collections'
@@ -7,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 export class Collection extends Model {
 
   @PrimaryKey
-  @Default(uuidv4())
   @Column
   id: string
 
@@ -26,11 +24,11 @@ export class Collection extends Model {
   @Column
   "provenance-hash": string
 
-  @Column
-  "mint-starts": Date
+  @Column(DataType.DATE)
+  "mint-starts": string
 
-  @Column
-  "premint-ends": Date
+  @Column(DataType.DATE)
+  "premint-ends": string
 
   @Column(DataType.ARRAY(DataType.STRING))
   "premint-whitelist": [string]
@@ -44,6 +42,7 @@ export class Collection extends Model {
   @Column(DataType.ARRAY(DataType.STRING))
   "token-list": [string]
 
+  @CreatedAt
   @Column
   createdAt: string;
 

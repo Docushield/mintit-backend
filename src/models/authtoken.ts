@@ -1,5 +1,4 @@
-import { Table, Column, Model, HasMany, CreatedAt, PrimaryKey, Default } from 'sequelize-typescript'
-import { v4 as uuidv4 } from 'uuid';
+import { Table, DataType, Column, Model, HasMany, CreatedAt, PrimaryKey, Default } from 'sequelize-typescript'
 
 @Table({
   tableName: 'authTokens'
@@ -7,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 export class AuthToken extends Model {
 
   @PrimaryKey
-  @Default(uuidv4())
   @Column
   id: string
 
@@ -21,4 +19,12 @@ export class AuthToken extends Model {
   @Column
   createdAt: string;
 
+  @Column(DataType.STRING)
+  status: TokenStatus;
+
+}
+
+export enum TokenStatus {
+  ACTIVE,
+  DISABLED
 }

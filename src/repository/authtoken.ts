@@ -1,6 +1,7 @@
 import { connect } from "../db";
 import { APILogger } from '../logger/api';
-import { AuthToken } from "../models/authtoken";
+import { AuthToken, TokenStatus } from "../models/authtoken";
+import { v4 as uuidv4 } from 'uuid';
 
 export class AuthTokenRepository {
 
@@ -18,6 +19,8 @@ export class AuthTokenRepository {
         let data = {};
         try {
             authToken["createdAt"] = new Date().toISOString();
+            authToken["id"] = uuidv4();
+            authToken["status"] = TokenStatus.ACTIVE;
             data = await this.authTokenRespository.create(authToken);
         } catch(err) {
             this.logger.error('Error::' + err);
@@ -25,12 +28,12 @@ export class AuthTokenRepository {
         return data;
     }
 
-    async deleteAuthToken(authTokenName: string) {
+    async deleteAuthToken(authToken: string) {
         let data = {};
         try {
-            data = await this.authTokenRespository.destroy({
+            data = await this.authTokenRespository.update({ status: TokenStatus.DISABLED }, {
                 where: {
-                    name: authTokenName
+                    token: authToken
                 }
             });
         } catch(err) {
@@ -38,5 +41,4 @@ export class AuthTokenRepository {
         }
         return data;
     }
-
 }
