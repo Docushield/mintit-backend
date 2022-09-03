@@ -28,6 +28,20 @@ export class AuthTokenRepository {
         return data;
     }
 
+    async findToken(authToken: string){
+        let data = {};
+        try {
+            data = await this.authTokenRespository.findOne({
+                where: {
+                    token: authToken
+                }
+            });
+        } catch(err) {
+            this.logger.error('Error::' + err);
+        }
+        return data;
+    }
+
     async deleteAuthToken(authToken: string) {
         let data = {};
         try {

@@ -19,6 +19,10 @@ export class LoginController {
         return await this.authTokenRespository.createToken(authToken);
     }
 
+    async removeAuthToken(token: string){
+        return await this.authTokenRespository.deleteAuthToken(token);
+    }
+
     login(req: TypedRequestBody<{ account: string, command: {cmd: string}, signature: string }>, res: Response) {
         // FIXME: Add logic for validation.
         const token= uuidv4();
@@ -28,6 +32,7 @@ export class LoginController {
 
     logout(req: Request, res: Response) {
         console.log(req.headers['X-Auth-Token']);
+        this.removeAuthToken(req.header['X-Auth-Token']);
         // FIXME: add validation on the above header
         return res.status(200).json({});
     }
