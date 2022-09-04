@@ -12,4 +12,4 @@ Express/NodeJS backend for MintIt Platform implemented in typescript.
 - `docker build -t {tagName} .`
 
 #### Docker run
-- `docker run -p 0.0.0.0:3000:3000 {imageId}`
+- `docker run -p 0.0.0.0:4000:4000 {imageId}`
