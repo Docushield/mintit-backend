@@ -34,12 +34,9 @@ export class LoginController {
 
     verifySignature(account: string, command: string, signature: string): boolean {
         const pubKey = this.getPublicKey(account);
-        console.log(command);
         const commandJSON = JSON.parse(command);
-        console.log(commandJSON);
         // Unfortunate consequence of X-Wallet signing a triple-jsonified datetime
         const nonce = JSON.parse(JSON.parse(commandJSON.nonce));
-        console.log(nonce);
 
         // Check that the nonce is not older than 60 seconds
         if (Date.now() - Date.parse(nonce) > 60000) {
