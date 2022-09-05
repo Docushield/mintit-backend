@@ -5,7 +5,8 @@ import { AuthTokenRepository } from '../../repository/authtoken';
 import { CollectionRepository } from '../../repository/collection';
 import { Collection } from '../../models/collection';
 import { TokenStatus } from '../../models/authtoken';
-import { lang, crypto, fetch } from 'pact-lang-api';
+import { lang, crypto } from 'pact-lang-api';
+import Pact from 'pact-lang-api';
 
 export class CollectionController {
     private authTokenRespository: AuthTokenRepository;
@@ -61,12 +62,21 @@ export class CollectionController {
                                                                                                       )
                                                                     const kp = {publicKey: 'd46967fd03942c50f0d50edc9c35d018fe01166853dc79f62e2fdf72689e0484', secretKey: 'cb9132eea7c2f7bee3b4d272f5fd43a34b33198f6bd56637b2640ce2bf9bfa93'};
                                                                     //const signedExp = crypto.sign(expression, kp);
-                                                                    const cmd = { keyPairs: kp
+                                                                    const metaInfo = lang.mkMeta(req.body["creator"], "1", 0.0001, 100, Math.floor(new Date().getTime() / 1000), 28800);
+                                                                    const api_host = process.env.API_HOST || "https://api.testnet.chainweb.com";
+                                                                    const networkId = process.env.NETWORK_ID || "testnet04";
+                                                                    const chainId = process.env.CHAIN_ID || "1";
+                                                                    const cmd = [{ keyPairs: kp
                                                                                 , pactCode: expression
-                                                                                };
+                                                                                , meta: metaInfo
+                                                                                , networkId: networkId
+                                                                                }];
 
-                                                                    fetch.local(cmd, "http://localhost:9999").then(d => console.log("data receieve", d)).catch(e => console.log("error", e));
-                                                                    res.status(200).json({});
+                                                                    Pact.fetch.send(cmd, api_host + "/chainweb/0.0/" + networkId + "/chain/" + chainId + "/pact").then(d => { console.log("data receieve", d);
+                                                                                                                                                                              res.status(200).json({response: d});
+                             }).catch(e => { console.log("error", e);
+                                             res.status(500).json({error: e});
+                                           });
                                                                 }
                                                               });
       }

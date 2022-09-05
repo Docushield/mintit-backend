@@ -7,6 +7,9 @@ import { loginRouter, collectionRouter } from './routes';
 const app = express();
 const PORT:Number=4000;
 
+// required for connect with testnet.
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 // TODO: Update to env variables with real server hosts
 const allowedOrigins = ['http://localhost:3000'];
 const corsOptions: cors.CorsOptions = {
