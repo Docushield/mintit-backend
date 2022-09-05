@@ -30,6 +30,7 @@ export class AuthTokenRepository {
 
     async findToken(authToken: string){
         let data = {};
+        console.log(authToken);
         try {
             data = await this.authTokenRespository.findOne({
                 where: {
