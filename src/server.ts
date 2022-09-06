@@ -5,7 +5,7 @@ import * as bodyParser from "body-parser";
 import { loginRouter, collectionRouter } from './routes';
 
 const app = express();
-const PORT:Number=4000;
+const PORT:Number=8080;
 
 // TODO: Update to env variables with real server hosts
 const allowedOrigins = ['http://localhost:3000'];
