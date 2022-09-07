@@ -26,7 +26,7 @@ export class CollectionController {
 
 
     addCollection(req: Request, res: Response) {
-        const tokenU = req.headers['x-auth-token'];
+        let tokenU = req.headers['x-auth-token'];
         var token: string = "";
         if(tokenU){
           if (typeof tokenU == "string"){
@@ -45,7 +45,7 @@ export class CollectionController {
               res.status(400).send({error: "Token is Disabled"});
             else {
               this.collectionRepository.createCollection(req.body);
-              const expression = lang.mkExp("mintit-market.create-nft-collection"
+              let expression = lang.mkExp("mintit-market.create-nft-collection"
                                             , req.body.creator
                                             , req.body.description
                                             , req.body.name
@@ -61,15 +61,14 @@ export class CollectionController {
                                             , req.body["sale-royalties"]
                                             , req.body["init-royalties"]
                                             );
-              const kp =  { publicKey: 'd46967fd03942c50f0d50edc9c35d018fe01166853dc79f62e2fdf72689e0484'
+              let kp =  { publicKey: 'd46967fd03942c50f0d50edc9c35d018fe01166853dc79f62e2fdf72689e0484'
                           , secretKey: 'cb9132eea7c2f7bee3b4d272f5fd43a34b33198f6bd56637b2640ce2bf9bfa93'
                           };
-              //const signedExp = crypto.sign(expression, kp);
-              const api_host = process.env.API_HOST || "https://api.testnet.chainweb.com";
-              const networkId = process.env.NETWORK_ID || "testnet04";
-              const chainId = process.env.CHAIN_ID || "1";
-              const metaInfo = lang.mkMeta(req.body["creator"], chainId, 0.0001, 100, Math.floor(new Date().getTime() / 1000), 28800);
-              const cmd = [{ keyPairs: kp
+              let api_host = process.env.API_HOST || "https://api.testnet.chainweb.com";
+              let networkId = process.env.NETWORK_ID || "testnet04";
+              let chainId = process.env.CHAIN_ID || "1";
+              let metaInfo = lang.mkMeta("k:" + kp.publicKey, chainId, 0.0001, 100, Math.floor(new Date().getTime() / 1000), 28800);
+              let cmd = [{ keyPairs: kp
                           , pactCode: expression
                           , meta: metaInfo
                           , networkId: networkId
