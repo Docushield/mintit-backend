@@ -39,8 +39,8 @@ export class Collection extends Model {
   @Column
   "mint-price": number
 
-  @Column(DataType.ARRAY(DataType.STRING))
-  "token-list": [string]
+  @Column(DataType.ARRAY(DataType.JSONB))
+  "token-list": [object]
 
   @CreatedAt
   @Column
@@ -52,8 +52,6 @@ export class Collection extends Model {
   @Column(DataType.ARRAY(DataType.JSONB))
   "sale-royalities": [object]
 
-  @Column(DataType.ARRAY(DataType.JSONB))
-  tokens: [object];
 }
 
 type MintRoyalties = {
