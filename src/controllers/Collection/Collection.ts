@@ -25,63 +25,39 @@ export class CollectionController {
     }
 
 
-    addCollection(req: Request, res: Response) {
+    async addCollection(req: Request, res: Response) {
         let tokenU = req.headers['x-auth-token'];
-        var token: string = "";
-        if(tokenU){
-          if (typeof tokenU == "string"){
-            token = tokenU;
-          } else {
-            token = tokenU[0];
-          }
-        }
-        if(token == ""){
-          res.status(403).json({message: 'auth-token missing'});
-        } else {
-          this.findToken(token).then(d => {
-            if(Object.keys(d).length == 0)
-              res.status(400).send({error: "Token Not found"});
-            else if (d["status"] == TokenStatus.DISABLED)
-              res.status(400).send({error: "Token is Disabled"});
-            else {
-              let nftData = { ...req.body};
-              //nftData["fungible"] = Pact.coin;
-              nftData["fungible"] = {"refName": {"name": "coin",
-                                                  "namespace": null
-                                                },
-                                      "refSpec": [
-                                                  {
-                                                    "name": "fungible-v2",
-                                                    "namespace": null
-                                                  }
-                                                ]
-                                    };
-              this.collectionRepository.createCollection(req.body);
-              let expression = `(free.z74plc.init-nft-collection ${JSON.stringify(nftData)})`;
-              let kp =  { publicKey: process.env.PUBLIC_KEY
-                        , secretKey: process.env.SECRET_KEY
-                        };
-              let api_host = process.env.API_HOST || "https://api.testnet.chainweb.com";
-              let networkId = process.env.NETWORK_ID || "testnet04";
-              let chainId = process.env.CHAIN_ID || "1";
-              let metaInfo = lang.mkMeta("k:" + kp.publicKey, chainId, 0.0001, 100, Math.floor(new Date().getTime() / 1000), 28800);
-              let cmd = [{ keyPairs: kp
-                          , pactCode: expression
-                          , meta: metaInfo
-                          , networkId: networkId
-                          }];
-
-              Pact.fetch.send(cmd, api_host + "/chainweb/0.0/" + networkId + "/chain/" + chainId + "/pact")
-                  .then(d => { console.log("data receieve", d);
-                              res.status(200).json({response: d});
-                            }
-                      )
-                  .catch(e => { console.log("error", e);
-                                res.status(500).json({error: e});
-                              }
-                        );
-              }
+        let d = await this.authTokenRespository.validateToken(tokenU, res);
+        if(d != null){
+          this.collectionRepository.createCollection(req.body);
+          let tokenListHashes = req.body["token-list"].map(val => {
+            return val.hash;
           });
-      }
-  }
+          console.log(tokenListHashes);
+          let expression = `(free.z74plc.init-nft-collection {"creator": ${JSON.stringify(req.body.creator)}, "description": ${JSON.stringify(req.body.description)}, "name" : ${JSON.stringify(req.body.name)}, "type": ${JSON.stringify(req.body.type)}, "provenance-hash": ${JSON.stringify(req.body["provenance-hash"])}, "mint-starts": (time ${JSON.stringify(req.body["mint-starts"])}), "premint-ends": (time ${JSON.stringify(req.body["premint-ends"])}), "premint-whitelist": ${JSON.stringify(req.body["premint-whitelist"])}, "size": ${req.body.size}, "mint-price": ${req.body["mint-price"].toFixed(2)}, "sale-royalties": ${JSON.stringify(req.body["sale-royalties"])}, "mint-royalties": ${JSON.stringify(req.body["mint-royalties"])}, "fungible": coin, "token-list": ${JSON.stringify(tokenListHashes)}})`;
+          console.log(expression);
+          let kp =  { publicKey: process.env.PUBLIC_KEY
+                    , secretKey: process.env.SECRET_KEY
+                    };
+          let api_host = process.env.API_HOST || "https://api.testnet.chainweb.com";
+          let networkId = process.env.NETWORK_ID || "testnet04";
+          let chainId = process.env.CHAIN_ID || "1";
+          let metaInfo = lang.mkMeta("k:" + kp.publicKey, chainId, 0.0001, 100, Math.floor(new Date().getTime() / 1000), 28800);
+          let cmd = [{ keyPairs: kp
+                      , pactCode: expression
+                      , meta: metaInfo
+                      , networkId: networkId
+                      }];
+
+          Pact.fetch.send(cmd, api_host + "/chainweb/0.0/" + networkId + "/chain/" + chainId + "/pact")
+              .then(d => { console.log("data receieve", d);
+                          res.status(200).json({response: d});
+                        }
+                  )
+              .catch(e => { console.log("error", e);
+                            res.status(500).json({error: e});
+                          }
+                    );
+       }
+    }
 }

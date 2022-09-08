@@ -2,6 +2,7 @@ import { connect } from "../db";
 import { APILogger } from '../logger/api';
 import { AuthToken, TokenStatus } from "../models/authtoken";
 import { v4 as uuidv4 } from 'uuid';
+import { Response } from 'express';
 
 export class AuthTokenRepository {
 
@@ -13,6 +14,32 @@ export class AuthTokenRepository {
         this.db = connect();
         this.authTokenRespository = this.db.sequelize.getRepository(AuthToken);
         this.logger = new APILogger();
+    }
+
+    async validateToken(tokenU: string| string[]| undefined, res: Response){
+        var token: string = "";
+        if(tokenU){
+          if (typeof tokenU == "string"){
+            token = tokenU;
+          } else {
+            token = tokenU[0];
+          }
+        }
+        if(token == ""){
+          res.status(403).send({error: "auth token missing in headers"});
+          return null;
+        } else {
+          let d = await this.findToken(token);
+          console.log(d);
+          if(Object.keys(d || {}).length == 0){
+            res.status(400).send({error: "Token Not found in DB"});
+            return null;
+          } else if (d["status"] == TokenStatus.DISABLED){
+            res.status(400).send({error: "Token is Disabled"});
+            return null;
+          }
+          else return d;
+        }
     }
 
     async createToken(authToken: {account: string, token: string}) {
