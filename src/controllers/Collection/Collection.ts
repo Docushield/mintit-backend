@@ -45,25 +45,22 @@ export class CollectionController {
               res.status(400).send({error: "Token is Disabled"});
             else {
               let nftData = { ...req.body};
-              nftData["fungible"] = Pact.coin;
-              //nftData["fungible"] = {"refName": {"name": "coin",
-                                                  //"namespace": null
-                                                //},
-                                      //"refSpec": [
-                                                  //{
-                                                    //"name": "fungible-v2",
-                                                    //"namespace": null
-                                                  //}
-                                                //]
-                                    //};
-              console.log(nftData);
+              //nftData["fungible"] = Pact.coin;
+              nftData["fungible"] = {"refName": {"name": "coin",
+                                                  "namespace": null
+                                                },
+                                      "refSpec": [
+                                                  {
+                                                    "name": "fungible-v2",
+                                                    "namespace": null
+                                                  }
+                                                ]
+                                    };
               this.collectionRepository.createCollection(req.body);
-              let expression = lang.mkExp("free.z74plc.init-nft-collection"
-                                          , nftData
-                                            );
-              let kp =  { publicKey: 'd46967fd03942c50f0d50edc9c35d018fe01166853dc79f62e2fdf72689e0484'
-                          , secretKey: 'cb9132eea7c2f7bee3b4d272f5fd43a34b33198f6bd56637b2640ce2bf9bfa93'
-                          };
+              let expression = `(free.z74plc.init-nft-collection ${JSON.stringify(nftData)})`;
+              let kp =  { publicKey: process.env.PUBLIC_KEY
+                        , secretKey: process.env.SECRET_KEY
+                        };
               let api_host = process.env.API_HOST || "https://api.testnet.chainweb.com";
               let networkId = process.env.NETWORK_ID || "testnet04";
               let chainId = process.env.CHAIN_ID || "1";
