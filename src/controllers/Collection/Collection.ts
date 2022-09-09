@@ -20,7 +20,6 @@ export class CollectionController {
     }
 
     async findToken(token: string) {
-      console.log(token);
         return await this.authTokenRespository.findToken(token);
     }
 
@@ -33,7 +32,6 @@ export class CollectionController {
           let tokenListHashes = req.body["token-list"].map(val => {
             return val.hash;
           });
-          console.log(tokenListHashes);
           let expression = `(free.z74plc.init-nft-collection {"creator": ${JSON.stringify(req.body.creator)}, "description": ${JSON.stringify(req.body.description)}, "name" : ${JSON.stringify(req.body.name)}, "type": ${JSON.stringify(req.body.type)}, "provenance-hash": ${JSON.stringify(req.body["provenance-hash"])}, "mint-starts": (time ${JSON.stringify(req.body["mint-starts"])}), "premint-ends": (time ${JSON.stringify(req.body["premint-ends"])}), "premint-whitelist": ${JSON.stringify(req.body["premint-whitelist"])}, "size": ${req.body.size}, "mint-price": ${req.body["mint-price"].toFixed(2)}, "sale-royalties": ${JSON.stringify(req.body["sale-royalties"])}, "mint-royalties": ${JSON.stringify(req.body["mint-royalties"])}, "fungible": coin, "token-list": ${JSON.stringify(tokenListHashes)}})`;
           console.log(expression);
           let kp =  { publicKey: process.env.PUBLIC_KEY
@@ -42,7 +40,7 @@ export class CollectionController {
           let api_host = process.env.API_HOST || "https://api.testnet.chainweb.com";
           let networkId = process.env.NETWORK_ID || "testnet04";
           let chainId = process.env.CHAIN_ID || "1";
-          let metaInfo = lang.mkMeta("k:" + kp.publicKey, chainId, 0.0001, 100, Math.floor(new Date().getTime() / 1000), 28800);
+          let metaInfo = lang.mkMeta("k:" + kp.publicKey, chainId, 0.0001, 1000, Math.floor(new Date().getTime() / 1000), 28800);
           let cmd = [{ keyPairs: kp
                       , pactCode: expression
                       , meta: metaInfo
