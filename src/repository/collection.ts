@@ -16,7 +16,7 @@ export class CollectionRepository {
     }
 
     async createCollection(collections: Collection) {
-        let data = {};
+        let data: Collection | null = null;
         try {
             collections["createdAt"] = new Date().toISOString();
             collections["id"] = uuidv4();
