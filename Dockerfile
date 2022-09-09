@@ -14,5 +14,5 @@ COPY package.json ./
 RUN npm install
 COPY --from=0 /usr/dist .
 RUN npm install pm2 pg -g
-EXPOSE 4000
+EXPOSE 8080
 CMD ["node", "server.js"]

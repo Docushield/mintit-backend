@@ -5,7 +5,7 @@ import * as bodyParser from "body-parser";
 import { loginRouter, collectionRouter } from './routes';
 
 const app = express();
-const PORT:Number=4000;
+const PORT:Number=8080;
 
 // required for connect with testnet.
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
