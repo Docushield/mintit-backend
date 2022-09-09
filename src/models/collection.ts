@@ -46,11 +46,11 @@ export class Collection extends Model {
   @Column
   createdAt: string;
 
-  @Column(DataType.ARRAY(DataType.JSONB))
-  "mint-royalities": [object]
+  @Column(DataType.JSONB)
+  "mint-royalties": object
 
-  @Column(DataType.ARRAY(DataType.JSONB))
-  "sale-royalities": [object]
+  @Column(DataType.JSONB)
+  "sale-royalties": object
 
 }
 
