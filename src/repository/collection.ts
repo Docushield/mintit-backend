@@ -17,25 +17,26 @@ export class CollectionRepository {
 
   async createCollection(collection: Collection, res: Response) {
     try {
-      if (
-        !collection.creator ||
-        !collection.description ||
-        !collection.name ||
-        !collection.type ||
-        !collection["provenance-hash"] ||
-        !collection["mint-starts"] ||
-        !collection["premint-ends"] ||
-        !collection["premint-whitelist"] ||
-        !collection.size ||
-        !collection["mint-price"] ||
-        !collection["token-list"] ||
-        !collection["mint-royalties"] ||
-        !collection["sale-royalties"]
-      ) {
-        console.log("BAD_REQUEST, fields of collection can't be null");
-        res.status(400).json({ error: "Missing mandatory fields." });
-        return null;
-      }
+      [
+        "creator",
+        "description",
+        "name",
+        "type",
+        "provenance-hash",
+        "mint-starts",
+        "premint-ends",
+        "premint-whitelist",
+        "size",
+        "mint-price",
+        "token-list",
+        "mint-royalties",
+        "sale-royalties",
+      ].forEach((field) => {
+        if (!collection[field]) {
+          res.status(400).json({ error: `Missing mandatory field ${field}` });
+          return null;
+        }
+      });
       collection["createdAt"] = new Date().toISOString();
       collection["id"] = uuidv4();
       return await this.collectionsRespository.create(collection);

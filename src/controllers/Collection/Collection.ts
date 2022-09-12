@@ -29,7 +29,7 @@ export class CollectionController {
   }
 
   async getNFTCollectionStatus(id: string, res: Response) {
-    let nft = await this.nftRepository.findNFTCollection(id);
+    const nft = await this.nftRepository.findNFTCollection(id);
     if (!nft) {
       res.status(400).json({ error: "No NFT Collection found." });
       return;
@@ -39,21 +39,21 @@ export class CollectionController {
   }
 
   async addCollection(req: Request, res: Response) {
-    let tokenU = req.headers["x-auth-token"];
-    let isAuthenticated = await this.authTokenRespository.validateToken(
+    const tokenU = req.headers["x-auth-token"];
+    const isAuthenticated = await this.authTokenRespository.validateToken(
       tokenU,
       res
     );
     if (!isAuthenticated) {
       return;
     }
-    let collection = await this.collectionRepository.createCollection(
+    const collection = await this.collectionRepository.createCollection(
       req.body,
       res
     );
     if (!collection) return;
-    let expression = NFT.initNFTExpression(req, collection);
-    var txResponse = await Kadena.sendTx(expression);
+    const expression = NFT.initNFTExpression(req, collection);
+    const txResponse = await Kadena.sendTx(expression);
     if (!txResponse) {
       res
         .status(500)
@@ -61,7 +61,7 @@ export class CollectionController {
       return;
     }
     if (txResponse["requestKeys"]) {
-      var nftCollection = await this.nftRepository.createNFTCollection(
+      const nftCollection = await this.nftRepository.createNFTCollection(
         {
           collection_id: collection.id,
           request_key: txResponse.requestKeys[0],
@@ -72,7 +72,7 @@ export class CollectionController {
       );
       if (!nftCollection) return;
 
-      var listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
+      const listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
       if (!listenTxResponse) {
         res.status(500).json({
           error: "error while listening on transaction to blockchain",
@@ -80,7 +80,7 @@ export class CollectionController {
         return;
       }
 
-      var updatedNFT = this.nftRepository.updateStatus(
+      const updatedNFT = this.nftRepository.updateStatus(
         nftCollection.id,
         listenTxResponse.result.status,
         res
