@@ -1,5 +1,5 @@
 import { Collection } from './collection'
-import { Table, Column, Model, Default, HasMany, PrimaryKey, DataType, ForeignKey } from 'sequelize-typescript'
+import { Table, Column, Model, Default, HasMany, PrimaryKey, DataType, ForeignKey, CreatedAt } from 'sequelize-typescript'
 
 @Table({
   tableName: 'nfts'
@@ -12,13 +12,22 @@ export class NFT extends Model {
 
   @ForeignKey (() => Collection)
   @Column
-  collection_id: number
+  collection_id: string
+
+  @Column
+  request_key: string
 
   @Column
   owner: string
 
-
   @Column(DataType.JSONB)
-  spec: object;
+  spec: object
+
+  @Column
+  status: string
+
+  @CreatedAt
+  @Column
+  createdAt: string;
 
 }

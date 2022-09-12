@@ -3,6 +3,7 @@ import { TypedRequestBody } from '../../express';
 import { APILogger } from '../../logger/api';
 import { AuthTokenRepository } from '../../repository/authtoken';
 import { CollectionRepository } from '../../repository/collection';
+import { NFTRepository } from '../../repository/nft';
 import { Collection } from '../../models/collection';
 import { TokenStatus } from '../../models/authtoken';
 import { lang, crypto } from 'pact-lang-api';
@@ -11,11 +12,13 @@ import Pact from 'pact-lang-api';
 export class CollectionController {
     private authTokenRespository: AuthTokenRepository;
     private collectionRepository: CollectionRepository;
+    private nftRepository: NFTRepository;
     private logger: APILogger;
 
     constructor() {
         this.authTokenRespository = new AuthTokenRepository();
         this.collectionRepository = new CollectionRepository();
+        this.nftRepository = new NFTRepository();
         this.logger = new APILogger()
     }
 
@@ -29,7 +32,7 @@ export class CollectionController {
         let d = await this.authTokenRespository.validateToken(tokenU, res);
         if(d != null){
           let collection = await this.collectionRepository.createCollection(req.body);
-          if(collection){
+          if(collection != null){
             let tokenListHashes = req.body["token-list"].map(val => {
               return val.hash;
             });
@@ -41,6 +44,7 @@ export class CollectionController {
             let api_host = process.env.API_HOST || "https://api.testnet.chainweb.com";
             let networkId = process.env.NETWORK_ID || "testnet04";
             let chainId = process.env.CHAIN_ID || "1";
+            let api  = api_host + "/chainweb/0.0/" + networkId + "/chain/" + chainId + "/pact";
             let metaInfo = lang.mkMeta("k:" + kp.publicKey, chainId, 0.0001, 1000, Math.floor(new Date().getTime() / 1000), 28800);
             let cmd = [{ keyPairs: kp
                         , pactCode: expression
@@ -48,15 +52,34 @@ export class CollectionController {
                         , networkId: networkId
                         }];
 
-            Pact.fetch.send(cmd, api_host + "/chainweb/0.0/" + networkId + "/chain/" + chainId + "/pact")
+            Pact.fetch.send(cmd, api)
                 .then(d => { console.log("data receieve", d);
-                            res.status(200).json({response: d});
+                            if(d["requestKeys"]){
+                              console.log(d.requestKeys[0]);
+                              this.nftRepository.createNFT({collection_id: collection!.id, request_key: d.requestKeys[0], owner: collection!.creator, spec: collection!["token-list"][0]["spec"]}).then(nft => {
+                                if (nft != null){
+                                  Pact.fetch.listen({listen: d.requestKeys[0]}, api)
+                                    .then(d => {  console.log("data recieved from listen: ", d)
+                                                  this.nftRepository.updateStatus(nft.id, d.result.status);
+                                                  console.log("Updated the status to: ", d.result.status, " for: ");
+                                              }
+                                        )
+                                    .catch(e => console.log("error: ", e));
+                                  res.status(200).json({id: nft.id});
+                                } else{
+                                  res.status(500).json({error: "unable to create the nft"});
+                                }
+                              })
+                            }
                           }
                     )
                 .catch(e => { console.log("error", e);
                               res.status(500).json({error: e});
+                              res.status(500).json({error: e});
                             }
                       );
+          } else{
+            res.status(500).json({error: "unable to create the collection"});
           }
         }
     }
