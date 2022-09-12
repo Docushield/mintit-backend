@@ -9,6 +9,7 @@ import { TokenStatus } from "../../models/authtoken";
 import { lang, crypto } from "pact-lang-api";
 import Pact from "pact-lang-api";
 import * as Kadena from "../../utils/kadena";
+import * as NFT from "../../utils/nft";
 
 export class CollectionController {
   private authTokenRespository: AuthTokenRepository;
@@ -44,76 +45,51 @@ export class CollectionController {
       res
     );
     if (!isAuthenticated) {
-      res.status(500).json({ error: "unable to create the collection" });
       return;
     }
-    let collection = await this.collectionRepository.createCollection(req.body);
-    if (collection != null) {
-      let tokenListHashes = req.body["token-list"].map((val) => {
-        return val.hash;
-      });
-      let expression = `(free.z74plc.init-nft-collection {"creator": ${JSON.stringify(
-        collection.creator
-      )}, "description": ${JSON.stringify(
-        collection.description
-      )}, "name" : ${JSON.stringify(collection.name)}, "type": ${JSON.stringify(
-        collection.type
-      )}, "provenance-hash": ${JSON.stringify(
-        collection["provenance-hash"]
-      )}, "mint-starts": (time ${JSON.stringify(
-        req.body["mint-starts"]
-      )}), "premint-ends": (time ${JSON.stringify(
-        req.body["premint-ends"]
-      )}), "premint-whitelist": ${JSON.stringify(
-        collection["premint-whitelist"]
-      )}, "size": ${collection.size}, "mint-price": ${collection[
-        "mint-price"
-      ].toFixed(2)}, "sale-royalties": ${JSON.stringify(
-        collection["sale-royalties"]
-      )}, "mint-royalties": ${JSON.stringify(
-        collection["mint-royalties"]
-      )}, "fungible": coin, "token-list": ${JSON.stringify(tokenListHashes)}})`;
-      try {
-        var txResponse = await Kadena.sendTx(expression);
-        console.log("response recieved from sendTx: ", txResponse);
-        if (txResponse["requestKeys"]) {
-          var nftCollection = await this.nftRepository.createNFTCollection({
-            collection_id: collection!.id,
+    let collection = await this.collectionRepository.createCollection(
+      req.body,
+      res
+    );
+    if (!collection) return;
+    let expression = NFT.initNFTExpression(req, collection);
+    try {
+      var txResponse = await Kadena.sendTx(expression);
+      console.log("response recieved from sendTx: ", txResponse);
+      if (txResponse["requestKeys"]) {
+        var nftCollection = await this.nftRepository.createNFTCollection(
+          {
+            collection_id: collection.id,
             request_key: txResponse.requestKeys[0],
-            owner: collection!.creator,
-            spec: collection!["token-list"][0]["spec"],
-          });
-          if (nftCollection != null) {
-            Kadena.listenTx(txResponse.requestKeys[0]).then((d) => {
-              console.log("data recieved from listen: ", d);
-              this.nftRepository.updateStatus(
-                nftCollection!.id,
-                d.result.status
-              );
-              console.log(
-                "Updated the status to: ",
-                d.result.status,
-                " for: ",
-                nftCollection!.id
-              );
-            });
-            res.status(200).json({ id: nftCollection!.id });
-          } else {
-            res
-              .status(500)
-              .json({ error: "unable to create the nft collection" });
-          }
-        } else {
+            owner: collection.creator,
+            spec: collection["token-list"][0]["spec"],
+          },
           res
-            .status(500)
-            .json({ error: "couldn't find the request key in repsonse" });
-        }
-        return;
-      } catch (e) {
-        console.log("exception occurred while creating collection flow: ", e);
-        res.status(500).json({ error: e });
-        return;
+        );
+        if (!nftCollection) return;
+        var listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
+        console.log("data recieved from listen: ", listenTxResponse);
+        var updatedNFT = this.nftRepository.updateStatus(
+          nftCollection.id,
+          listenTxResponse.result.status,
+          res
+        );
+        if (!updatedNFT) return;
+        console.log(
+          "Updated the status to: ",
+          listenTxResponse.result.status,
+          " for: ",
+          nftCollection!.id
+        );
+        res.status(200).json({ id: nftCollection!.id });
+      } else {
+        res.status(500).json({ error: "unable to create the nft collection" });
       }
+      return;
+    } catch (e) {
+      console.log("exception occurred while creating collection flow: ", e);
+      res.status(500).json({ error: e });
+      return;
     }
   }
 }

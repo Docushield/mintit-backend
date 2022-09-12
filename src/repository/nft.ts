@@ -15,25 +15,30 @@ export class NFTRepository {
     this.logger = new APILogger();
   }
 
-  async createNFTCollection(nft: {
-    collection_id: string;
-    request_key: string;
-    owner: string;
-    spec: object;
-  }) {
-    let data: NFT | null = null;
+  async createNFTCollection(
+    nft: {
+      collection_id: string;
+      request_key: string;
+      owner: string;
+      spec: object;
+    },
+    res: Response
+  ) {
     try {
       nft["createdAt"] = new Date().toISOString();
       nft["id"] = uuidv4();
       nft["status"] = "PENDING";
-      data = await this.nftRepository.create(nft);
+      return await this.nftRepository.create(nft);
     } catch (err) {
       this.logger.error("Error::" + err);
+      res
+        .status(500)
+        .json({ error: "error occurred while creating nft collection: ", err });
+      return;
     }
-    return data;
   }
 
-  async updateStatus(id: string, status: string) {
+  async updateStatus(id: string, status: string, res: Response) {
     let data = {};
     try {
       data = await this.nftRepository.update(
@@ -46,6 +51,10 @@ export class NFTRepository {
       );
     } catch (err) {
       this.logger.error("Error::" + err);
+      res.status(500).json({
+        error: "error occurred while updating nft collection status: ",
+        err,
+      });
     }
     return data;
   }
