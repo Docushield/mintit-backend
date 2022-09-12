@@ -8,3 +8,7 @@ export const router = express.Router({
 router.post("/", (req: Request, res: Response) => {
   collectionController.addCollection(req, res);
 });
+
+router.get("/status/:id", (req: Request, res: Response) => {
+  collectionController.getNFTCollectionStatus(req.params["id"], res);
+});

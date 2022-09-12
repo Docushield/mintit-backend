@@ -27,6 +27,16 @@ export class CollectionController {
     return await this.authTokenRespository.findToken(token);
   }
 
+  async getNFTCollectionStatus(id: string, res: Response) {
+    let nft = await this.nftRepository.findNFTCollection(id);
+    if (!nft) {
+      res.status(400).json({ error: "No NFT Collection found." });
+      return;
+    }
+    res.status(200).json({ id: id, status: nft["status"] });
+    return;
+  }
+
   async addCollection(req: Request, res: Response) {
     let tokenU = req.headers["x-auth-token"];
     let isAuthenticated = await this.authTokenRespository.validateToken(
@@ -67,7 +77,6 @@ export class CollectionController {
         var txResponse = await Kadena.sendTx(expression);
         console.log("response recieved from sendTx: ", txResponse);
         if (txResponse["requestKeys"]) {
-          console.log(txResponse.requestKeys[0]);
           var nftCollection = await this.nftRepository.createNFTCollection({
             collection_id: collection!.id,
             request_key: txResponse.requestKeys[0],
