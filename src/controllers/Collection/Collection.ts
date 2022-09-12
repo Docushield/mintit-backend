@@ -53,43 +53,50 @@ export class CollectionController {
     );
     if (!collection) return;
     let expression = NFT.initNFTExpression(req, collection);
-    try {
-      var txResponse = await Kadena.sendTx(expression);
-      console.log("response recieved from sendTx: ", txResponse);
-      if (txResponse["requestKeys"]) {
-        var nftCollection = await this.nftRepository.createNFTCollection(
-          {
-            collection_id: collection.id,
-            request_key: txResponse.requestKeys[0],
-            owner: collection.creator,
-            spec: collection["token-list"][0]["spec"],
-          },
-          res
-        );
-        if (!nftCollection) return;
-        var listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
-        console.log("data recieved from listen: ", listenTxResponse);
-        var updatedNFT = this.nftRepository.updateStatus(
-          nftCollection.id,
-          listenTxResponse.result.status,
-          res
-        );
-        if (!updatedNFT) return;
-        console.log(
-          "Updated the status to: ",
-          listenTxResponse.result.status,
-          " for: ",
-          nftCollection!.id
-        );
-        res.status(200).json({ id: nftCollection!.id });
-      } else {
-        res.status(500).json({ error: "unable to create the nft collection" });
-      }
-      return;
-    } catch (e) {
-      console.log("exception occurred while creating collection flow: ", e);
-      res.status(500).json({ error: e });
+    var txResponse = await Kadena.sendTx(expression);
+    if (!txResponse) {
+      res
+        .status(500)
+        .json({ error: "error while sending transaction to blockchain" });
       return;
     }
+    if (txResponse["requestKeys"]) {
+      var nftCollection = await this.nftRepository.createNFTCollection(
+        {
+          collection_id: collection.id,
+          request_key: txResponse.requestKeys[0],
+          owner: collection.creator,
+          spec: collection["token-list"][0]["spec"],
+        },
+        res
+      );
+      if (!nftCollection) return;
+
+      var listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
+      if (!listenTxResponse) {
+        res.status(500).json({
+          error: "error while listening on transaction to blockchain",
+        });
+        return;
+      }
+
+      var updatedNFT = this.nftRepository.updateStatus(
+        nftCollection.id,
+        listenTxResponse.result.status,
+        res
+      );
+      if (!updatedNFT) return;
+
+      console.log(
+        "Updated the status to: ",
+        listenTxResponse.result.status,
+        " for: ",
+        nftCollection!.id
+      );
+      res.status(200).json({ id: nftCollection!.id });
+    } else {
+      res.status(500).json({ error: "unable to create the nft collection" });
+    }
+    return;
   }
 }

@@ -18,7 +18,7 @@ let metaInfo = Pact.lang.mkMeta(
   28800
 );
 
-export const sendTx = (expression: string) => {
+export const sendTx = async (expression: string) => {
   let cmd = [
     {
       keyPairs: kp,
@@ -27,10 +27,29 @@ export const sendTx = (expression: string) => {
       networkId: networkId,
     },
   ];
-  return Pact.fetch.send(cmd, api);
+  try {
+    let resp = await Pact.fetch.send(cmd, api);
+    console.log("response recieved from sendTx: ", resp);
+    return resp;
+  } catch (e) {
+    console.log("Error occurred while sending tx: ", e);
+    return;
+  }
 };
 
-export const listenTx = (requestKey: string) => {
+export const listenTx = async (requestKey: string) => {
   let cmd = { listen: requestKey };
-  return Pact.fetch.listen(cmd, api);
+  try {
+    let listenTxResponse = await Pact.fetch.listen(cmd, api);
+    console.log("data recieved from listen: ", listenTxResponse);
+    return listenTxResponse;
+  } catch (e) {
+    console.log(
+      "Error occurred while listing on tx: ",
+      e,
+      " for request_key: ",
+      requestKey
+    );
+    return;
+  }
 };
