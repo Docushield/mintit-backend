@@ -1,62 +1,69 @@
-import { CreatedAt, Table, Column, Model, Default, HasMany, PrimaryKey, DataType } from 'sequelize-typescript'
+import {
+  CreatedAt,
+  Table,
+  Column,
+  Model,
+  Default,
+  HasMany,
+  PrimaryKey,
+  DataType,
+} from "sequelize-typescript";
 
 @Table({
-  tableName: 'collections'
+  tableName: "collections",
 })
 export class Collection extends Model {
-
   @PrimaryKey
   @Column
-  id: string
+  id: string;
 
   @Column
-  creator: string
+  creator: string;
 
   @Column
-  description: string
+  description: string;
 
   @Column
-  name: string
+  name: string;
 
   @Column
-  type: string
+  type: string;
 
   @Column
-  "provenance-hash": string
+  "provenance-hash": string;
 
   @Column(DataType.DATE)
-  "mint-starts": string
+  "mint-starts": string;
 
   @Column(DataType.DATE)
-  "premint-ends": string
+  "premint-ends": string;
 
   @Column(DataType.ARRAY(DataType.STRING))
-  "premint-whitelist": [string]
+  "premint-whitelist": [string];
 
   @Column
-  size: number
+  size: number;
 
   @Column
-  "mint-price": number
+  "mint-price": number;
 
   @Column(DataType.ARRAY(DataType.JSONB))
-  "token-list": [object]
+  "token-list": [object];
 
   @CreatedAt
   @Column
   createdAt: string;
 
   @Column(DataType.JSONB)
-  "mint-royalties": object
+  "mint-royalties": object;
 
   @Column(DataType.JSONB)
-  "sale-royalties": object
-
+  "sale-royalties": object;
 }
 
 type MintRoyalties = {
-  description: string
-  stakeholder: string
-  "stakeholder-guard": object
-  rate: number
-}
+  description: string;
+  stakeholder: string;
+  "stakeholder-guard": object;
+  rate: number;
+};

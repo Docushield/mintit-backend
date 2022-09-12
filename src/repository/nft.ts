@@ -16,7 +16,7 @@ export class NFTRepository {
         this.logger = new APILogger();
     }
 
-    async createNFT(nft: {collection_id: string, request_key: string, owner: string, spec: object}) {
+    async createNFTCollection(nft: {collection_id: string, request_key: string, owner: string, spec: object}) {
         let data: NFT | null = null;
         try {
             nft["createdAt"] = new Date().toISOString();
