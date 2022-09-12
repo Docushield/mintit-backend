@@ -1,19 +1,27 @@
-import { Table, DataType, Column, Model, HasMany, CreatedAt, PrimaryKey, Default } from 'sequelize-typescript'
+import {
+  Table,
+  DataType,
+  Column,
+  Model,
+  HasMany,
+  CreatedAt,
+  PrimaryKey,
+  Default,
+} from "sequelize-typescript";
 
 @Table({
-  tableName: 'authTokens'
+  tableName: "authTokens",
 })
 export class AuthToken extends Model {
-
   @PrimaryKey
   @Column
-  id: string
+  id: string;
 
   @Column
-  token: string
+  token: string;
 
   @Column
-  account: string
+  account: string;
 
   @CreatedAt
   @Column
@@ -21,10 +29,9 @@ export class AuthToken extends Model {
 
   @Column(DataType.STRING)
   status: TokenStatus;
-
 }
 
 export enum TokenStatus {
   ACTIVE,
-  DISABLED
+  DISABLED,
 }

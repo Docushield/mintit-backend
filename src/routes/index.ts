@@ -1,9 +1,4 @@
-import { router as loginRouter } from './Login/Login';
-import { router as collectionRouter } from './Collection/Collection';
+import { router as loginRouter } from "./Login/Login";
+import { router as collectionRouter } from "./Collection/Collection";
 
-export
-{
-  loginRouter
-  , collectionRouter
-};
-
+export { loginRouter, collectionRouter };
