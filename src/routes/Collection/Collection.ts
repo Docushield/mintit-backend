@@ -10,5 +10,9 @@ router.post("/", (req: Request, res: Response) => {
 });
 
 router.get("/status/:id", (req: Request, res: Response) => {
-  collectionController.getNFTCollectionStatus(req.params["id"], res);
+  collectionController.getCollectionStatus(req, res);
+});
+
+router.get("/reveal/:id", (req: Request, res: Response) => {
+  collectionController.revealNFT(req, res);
 });

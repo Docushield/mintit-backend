@@ -32,6 +32,7 @@ export const connect = () => {
   const db: any = {};
   db.Sequelize = Sequelize;
   db.sequelize = sequelize;
+  //sequelize.sync();
 
   return db;
 };
