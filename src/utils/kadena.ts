@@ -13,7 +13,7 @@ export const sendTx = async (expression: string, caps = []) => {
   let metaInfo = Pact.lang.mkMeta(
     "k:" + kp.publicKey,
     chainId,
-    0.0001,
+    0.00000001,
     5000,
     Math.floor(new Date().getTime() / 1000),
     60
