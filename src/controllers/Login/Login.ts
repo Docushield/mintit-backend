@@ -42,9 +42,11 @@ export class LoginController {
     // Unfortunate consequence of X-Wallet signing a triple-jsonified datetime
     const nonce = JSON.parse(JSON.parse(commandJSON.nonce));
 
-    // Check that the nonce is not older than 60 seconds
-    if (Date.now() - Date.parse(nonce) > 60000) {
-      throw `Nonce in signed command is older than 60 seconds ago, received: ${nonce}`;
+    // Check that the nonce is not older than 3600 seconds
+    const now = Date.now()
+
+    if (now - Date.parse(nonce) > 3600000) {
+      throw `Nonce in signed command is older than 3600 seconds ago, received: ${nonce} (${Date.parse(nonce)}), server time: ${now}`;
     }
 
     return crypto.verifySignature(command, signature, pubKey);
