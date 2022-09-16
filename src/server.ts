@@ -18,6 +18,7 @@ const corsOptions: cors.CorsOptions = {
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
 
 app.use("/api/auth", loginRouter);
 app.use("/api/collections", collectionRouter);

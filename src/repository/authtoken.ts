@@ -40,17 +40,24 @@ export class AuthTokenRepository {
     }
   }
 
-  async createToken(authToken: { account: string; token: string }) {
+  async createToken(
+    authToken: { account: string; token: string },
+    res: Response
+  ) {
     let data = {};
     try {
       authToken["createdAt"] = new Date().toISOString();
       authToken["id"] = uuidv4();
       authToken["status"] = TokenStatus.ACTIVE;
       data = await this.authTokenRespository.create(authToken);
+      return data;
     } catch (err) {
       this.logger.error("Error::" + err);
+      res
+        .status(500)
+        .json({ error: "error occurred while creating auth token: " + err });
+      return null;
     }
-    return data;
   }
 
   async findToken(authToken: string) {

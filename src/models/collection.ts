@@ -48,7 +48,7 @@ export class Collection extends Model {
   "mint-price": number;
 
   @Column(DataType.ARRAY(DataType.JSONB))
-  "token-list": [object];
+  "token-list": [Token];
 
   @CreatedAt
   @Column
@@ -59,6 +59,9 @@ export class Collection extends Model {
 
   @Column(DataType.JSONB)
   "sale-royalties": object;
+
+  @Column
+  status: string;
 }
 
 type MintRoyalties = {
@@ -66,4 +69,10 @@ type MintRoyalties = {
   stakeholder: string;
   "stakeholder-guard": object;
   rate: number;
+};
+
+export type Token = {
+  spec: object;
+  hash: string;
+  content_uri: { scheme: string; data: string };
 };

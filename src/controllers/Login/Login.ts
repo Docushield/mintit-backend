@@ -15,9 +15,11 @@ export class LoginController {
     this.logger = new APILogger();
   }
 
-  async createAuthToken(authToken: { account: string; token: string }) {
-    this.logger.info("Controller: createAuthToken", authToken);
-    return await this.authTokenRespository.createToken(authToken);
+  async createAuthToken(
+    authToken: { account: string; token: string },
+    res: Response
+  ) {
+    return await this.authTokenRespository.createToken(authToken, res);
   }
 
   async removeAuthToken(token: string) {
@@ -52,7 +54,7 @@ export class LoginController {
     return crypto.verifySignature(command, signature, pubKey);
   }
 
-  login(
+  async login(
     req: TypedRequestBody<{
       account: string;
       command: string;
@@ -64,8 +66,15 @@ export class LoginController {
 
     if (this.verifySignature(account, command, signature)) {
       const token = uuidv4();
-      this.createAuthToken({ account: account, token: token });
-      return res.status(200).json({ token: token });
+      const authToken = await this.createAuthToken(
+        { account: account, token: token },
+        res
+      );
+      if (authToken == null) {
+        return;
+      }
+      res.status(200).json({ token: token });
+      return;
     } else {
       return res.status(401).json({ error: "signature validation failed" });
     }
