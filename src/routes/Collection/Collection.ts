@@ -16,3 +16,7 @@ router.get("/status/:id", (req: Request, res: Response) => {
 router.get("/reveal/:id", (req: Request, res: Response) => {
   collectionController.revealNFT(req, res);
 });
+
+router.get("/:id", (req: Request, res: Response) => {
+  collectionController.getCollection(req, res);
+});

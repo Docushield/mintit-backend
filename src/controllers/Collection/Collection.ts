@@ -43,6 +43,25 @@ export class CollectionController {
     return;
   }
 
+  async getCollection(req: Request, res: Response) {
+    const tokenU = req.headers["x-auth-token"];
+    const isAuthenticated = await this.authTokenRespository.validateToken(
+      tokenU,
+      res
+    );
+    if (!isAuthenticated) {
+      return;
+    }
+    const id = req.params["id"];
+    const nft = await this.collectionRepository.findCollection(id);
+    if (!nft) {
+      res.status(400).json({ error: "No Collection found." });
+      return;
+    }
+    res.status(200).json(nft);
+    return;
+  }
+
   async revealNFT(req: Request, res: Response) {
     const tokenU = req.headers["x-auth-token"];
     const isAuthenticated = await this.authTokenRespository.validateToken(
@@ -58,21 +77,36 @@ export class CollectionController {
       res.status(400).json({ error: "No Collection found." });
       return;
     }
+    let requestKeys = [];
     for (const token of collection["token-list"]) {
       const expression = NFT.revealNFTExpression(collection, token);
-      const txResponse = await Kadena.sendTx(expression);
-      if (!txResponse) {
-        res.status(500).json({
-          error: "error while sending reveal transaction to blockchain",
-        });
-        return;
-      }
-      if (txResponse["requestKeys"]) {
+      const cap = Pact.lang.mkCap(
+        "Marmalade mint",
+        "Capability to mint the token on Marmalade",
+        "marmalade.ledger.MINT",
+        ["t:" + token.hash, collection.creator, 1.0]
+      );
+      const txResponse = await Kadena.sendTx(expression, cap);
+      if (txResponse == null) {
+        console.log("error occurred while sending tx for token: ", token.hash);
       } else {
-        res.status(500).json({ error: "unable to reveal the nft collection" });
+        console.log(txResponse["requestKeys"]);
+        requestKeys = requestKeys.concat(txResponse["requestKeys"]);
       }
     }
-    res.status(200);
+    console.log("request keys: ", requestKeys);
+    res.status(200).json({ message: "Reveal of tokens succeeded." });
+    for (const requestKey of requestKeys) {
+      const listenTxResponse = await Kadena.listenTx(requestKey);
+      //if (!listenTxResponse) {
+      //res.status(500).json({
+      //error: "error while listening on transaction to blockchain",
+      //});
+      //allFinished = false;
+      //break;
+      //}
+    }
+    return;
   }
 
   async addCollection(req: Request, res: Response) {
@@ -88,7 +122,7 @@ export class CollectionController {
       req.body,
       res
     );
-    if (!collection) return;
+    if (collection == null) return;
     const expression = NFT.initNFTExpression(req, collection);
     const txResponse = await Kadena.sendTx(expression);
     if (!txResponse) {

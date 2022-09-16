@@ -17,6 +17,7 @@ export class CollectionRepository {
 
   async createCollection(collection: Collection, res: Response) {
     try {
+      var missingFields = new Array();
       [
         "creator",
         "description",
@@ -33,10 +34,17 @@ export class CollectionRepository {
         "sale-royalties",
       ].forEach((field) => {
         if (!collection[field]) {
-          res.status(400).json({ error: `Missing mandatory field ${field}` });
-          return null;
+          missingFields.push(field);
+          //res.status(400).json({ error: `Missing mandatory field ${field}` });
+          //return null;
         }
       });
+      if (missingFields.length > 0) {
+        res.status(400).json({
+          error: `Missing mandatory fields: ${JSON.stringify(missingFields)}`,
+        });
+        return;
+      }
       collection["createdAt"] = new Date().toISOString();
       collection["id"] = uuidv4();
       collection["status"] = "pending";
