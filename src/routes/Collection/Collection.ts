@@ -1,13 +1,22 @@
 import express, { Request, Response } from "express";
 import { collectionController } from "../../controllers";
+import multer from "multer";
+const upload = multer({ dest: "uploads/" });
 
 export const router = express.Router({
   strict: true,
 });
 
-router.post("/", (req: Request, res: Response) => {
-  collectionController.addCollection(req, res);
-});
+router.post(
+  "/",
+  upload.fields([
+    { name: "collection_image", maxCount: 1 },
+    { name: "collection_banner", maxCount: 1 },
+  ]),
+  (req: Request, res: Response) => {
+    collectionController.addCollection(req, res);
+  }
+);
 
 router.get("/status/:id", (req: Request, res: Response) => {
   collectionController.getCollectionStatus(req, res);

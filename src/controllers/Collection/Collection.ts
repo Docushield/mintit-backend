@@ -10,6 +10,8 @@ import { lang, crypto } from "pact-lang-api";
 import Pact from "pact-lang-api";
 import * as Kadena from "../../utils/kadena";
 import * as NFT from "../../utils/nft";
+import fs from "fs";
+import * as s3 from "../../utils/s3";
 
 export class CollectionController {
   private authTokenRespository: AuthTokenRepository;
@@ -118,8 +120,30 @@ export class CollectionController {
     if (!isAuthenticated) {
       return;
     }
+    let resp = "NO_URL";
+    let bannerResp = resp;
+    if ((req as any).files) {
+      const collectionImage = (req as any).files.collection_image[0];
+      const bannerImage = (req as any).files.collection_banner[0];
+      const imageData = fs.readFileSync(collectionImage.path);
+      resp = await s3.uploadFile({
+        key: collectionImage.originalname,
+        content: imageData,
+        type: collectionImage.mimetype,
+      });
+      const bannerData = fs.readFileSync(bannerImage.path);
+      bannerResp = await s3.uploadFile({
+        key: bannerImage.originalname,
+        content: imageData,
+        type: bannerImage.mimetype,
+      });
+    }
+    console.log("Response for uploading collection banner image: ", bannerResp);
+    console.log("Response for uploading collection image: ", resp);
     const collection = await this.collectionRepository.createCollection(
       req.body,
+      resp,
+      bannerResp,
       res
     );
     if (collection == null) return;
