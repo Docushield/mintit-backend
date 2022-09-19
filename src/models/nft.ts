@@ -24,9 +24,6 @@ export class NFT extends Model {
   collection_id: string;
 
   @Column
-  request_key: string;
-
-  @Column
   owner: string;
 
   @Column(DataType.JSONB)

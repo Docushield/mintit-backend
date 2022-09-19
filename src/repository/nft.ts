@@ -18,8 +18,7 @@ export class NFTRepository {
   async createNFT(
     nft: {
       collection_id: string;
-      request_key: string;
-      owner: string;
+      owner: string | null;
       spec: object;
     },
     res: Response
