@@ -1,8 +1,10 @@
 import * as AWS from "aws-sdk";
+import fs from "fs";
+import { File } from "../types";
 
 const bucketName = process.env.BUCKET_NAME || "mintit-files";
 
-export const uploadFile = async (file) => {
+export const uploadFile = async (file: File) => {
   const client = new AWS.S3();
   const uploadParams = {
     Bucket: bucketName,
@@ -43,4 +45,14 @@ export const getFile = async (key: string) => {
       }
     }
   );
+};
+
+export const uploadFileByPath = async (multerFile: Express.Multer.File) => {
+  const client = new AWS.S3();
+  const content = fs.readFileSync(multerFile.path).toString();
+  return uploadFile({
+    key: multerFile.originalname,
+    content: content,
+    type: multerFile.mimetype,
+  });
 };

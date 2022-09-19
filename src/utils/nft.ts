@@ -1,17 +1,15 @@
-import { Collection } from "../models/collection";
+import { Collection, Token } from "../models/collection";
 import { TypedRequestBody } from "../express";
 
 export const initNFTExpression = (
-  req: TypedRequestBody<{
-    body: {
-      "token-list": object;
-      "premint-ends": string;
-      "mint-starts": string;
-    };
-  }>,
+  body: {
+    "token-list": [Token];
+    "premint-ends": string;
+    "mint-starts": string;
+  },
   collection: Collection
 ) => {
-  let tokenListHashes = req.body!["token-list"].map((val) => {
+  let tokenListHashes = body["token-list"].map((val) => {
     return val.hash;
   });
   let expression = `(free.z74plc.init-nft-collection {"creator": "${
@@ -20,10 +18,8 @@ export const initNFTExpression = (
     collection.name
   }", "type": "${collection.type}", "provenance-hash": "${
     collection["provenance-hash"]
-  }", "mint-starts": (time "${
-    req.body!["mint-starts"]
-  }"), "premint-ends": (time "${
-    req.body!["premint-ends"]
+  }", "mint-starts": (time "${body["mint-starts"]}"), "premint-ends": (time "${
+    body!["premint-ends"]
   }"), "premint-whitelist": ${JSON.stringify(
     collection["premint-whitelist"]
   )}, "size": ${collection.size}, "mint-price": ${collection[

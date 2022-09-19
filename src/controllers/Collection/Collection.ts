@@ -123,20 +123,11 @@ export class CollectionController {
     let resp = "NO_URL";
     let bannerResp = resp;
     if (req.files) {
-      const collectionImage = req.files["collection_image"][0];
-      const bannerImage = req.files["collection_banner"][0];
-      const imageData = fs.readFileSync(collectionImage.path);
-      resp = await s3.uploadFile({
-        key: collectionImage.originalname,
-        content: imageData,
-        type: collectionImage.mimetype,
-      });
-      const bannerData = fs.readFileSync(bannerImage.path);
-      bannerResp = await s3.uploadFile({
-        key: bannerImage.originalname,
-        content: imageData,
-        type: bannerImage.mimetype,
-      });
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const collectionImage = files["collection_image"][0];
+      const bannerImage = files["collection_banner"][0];
+      resp = await s3.uploadFileByPath(collectionImage);
+      bannerResp = await s3.uploadFileByPath(bannerImage);
     }
     console.log("Response for uploading collection banner image: ", bannerResp);
     console.log("Response for uploading collection image: ", resp);
@@ -147,7 +138,7 @@ export class CollectionController {
       res
     );
     if (collection == null) return;
-    const expression = NFT.initNFTExpression(req, collection);
+    const expression = NFT.initNFTExpression(req.body, collection);
     const txResponse = await Kadena.sendTx(expression);
     if (!txResponse) {
       res
@@ -157,7 +148,7 @@ export class CollectionController {
     }
     if (txResponse["requestKeys"]) {
       for (const token of collection["token-list"]) {
-        const nftCollection = await this.nftRepository.createNFTCollection(
+        const nftCollection = await this.nftRepository.createNFT(
           {
             collection_id: collection.id,
             request_key: txResponse.requestKeys[0],
