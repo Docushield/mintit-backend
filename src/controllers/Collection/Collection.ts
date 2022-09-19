@@ -151,8 +151,7 @@ export class CollectionController {
         const nftCollection = await this.nftRepository.createNFT(
           {
             collection_id: collection.id,
-            request_key: txResponse.requestKeys[0],
-            owner: collection.creator,
+            owner: null,
             spec: token["spec"],
           },
           res
