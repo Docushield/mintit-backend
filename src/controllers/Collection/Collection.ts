@@ -54,8 +54,8 @@ export class CollectionController {
     if (!isAuthenticated) {
       return;
     }
-    const id = req.params["id"];
-    const nft = await this.collectionRepository.findCollection(id);
+    const id = req.params["slug"];
+    const nft = await this.collectionRepository.findCollectionBySlug(id);
     if (!nft) {
       res.status(400).json({ error: "No Collection found." });
       return;
@@ -111,6 +111,37 @@ export class CollectionController {
     return;
   }
 
+  async putCollection(req: Request, res: Response) {
+    const tokenU = req.headers["x-auth-token"];
+    const isAuthenticated = await this.authTokenRespository.validateToken(
+      tokenU,
+      res
+    );
+    if (!isAuthenticated) {
+      return;
+    }
+    if (req.files) {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      let bannerResp: string | null = null;
+      let resp: string | null = null;
+      if (files["collection_image"].length > 0) {
+        const collectionImage = files["collection_image"][0];
+        resp = await s3.uploadFileByPath(collectionImage);
+      }
+      if (files["collection_banner"].length > 0) {
+        const bannerImage = files["collection_banner"][0];
+        bannerResp = await s3.uploadFileByPath(bannerImage);
+      }
+      this.collectionRepository.updateCollectionImages(
+        req.body.slug,
+        resp,
+        bannerResp,
+        res
+      );
+    }
+    res.status(200).json({ message: "Updated successfully." });
+  }
+
   async addCollection(req: Request, res: Response) {
     const tokenU = req.headers["x-auth-token"];
     const isAuthenticated = await this.authTokenRespository.validateToken(
@@ -158,7 +189,7 @@ export class CollectionController {
         );
         if (!nftCollection) return;
       }
-      res.status(200).json({ id: collection!.id });
+      res.status(200).json({ slug: collection!.slug });
       // This will be happening async and try to init collection and update status
       // based on the response.rom blockchain
       const listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);

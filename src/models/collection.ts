@@ -7,6 +7,8 @@ import {
   HasMany,
   PrimaryKey,
   DataType,
+  Unique,
+  AllowNull,
 } from "sequelize-typescript";
 
 @Table({
@@ -68,6 +70,11 @@ export class Collection extends Model {
 
   @Column
   bannerImageUrl: string;
+
+  @Unique
+  @AllowNull(false)
+  @Column
+  slug: string;
 }
 
 type MintRoyalties = {
