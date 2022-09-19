@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import * as bodyParser from "body-parser";
 import { loginRouter, collectionRouter } from "./routes";
+import multer from "multer";
 
 const app = express();
 const PORT: Number = 8080;

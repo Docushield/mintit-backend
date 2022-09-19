@@ -15,7 +15,12 @@ export class CollectionRepository {
     this.logger = new APILogger();
   }
 
-  async createCollection(collection: Collection, res: Response) {
+  async createCollection(
+    collection: Collection,
+    imageUrl: string,
+    bannerImageUrl: string,
+    res: Response
+  ) {
     try {
       var missingFields = new Array();
       [
@@ -48,6 +53,8 @@ export class CollectionRepository {
       collection["createdAt"] = new Date().toISOString();
       collection["id"] = uuidv4();
       collection["status"] = "pending";
+      collection["imageUrl"] = imageUrl;
+      collection["bannerImageUrl"] = bannerImageUrl;
       return await this.collectionsRespository.create(collection);
     } catch (err) {
       this.logger.error("Error::" + err);

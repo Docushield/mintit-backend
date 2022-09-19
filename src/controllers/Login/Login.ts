@@ -45,10 +45,12 @@ export class LoginController {
     const nonce = JSON.parse(JSON.parse(commandJSON.nonce));
 
     // Check that the nonce is not older than 3600 seconds
-    const now = Date.now()
+    const now = Date.now();
 
     if (now - Date.parse(nonce) > 3600000) {
-      throw `Nonce in signed command is older than 3600 seconds ago, received: ${nonce} (${Date.parse(nonce)}), server time: ${now}`;
+      throw `Nonce in signed command is older than 3600 seconds ago, received: ${nonce} (${Date.parse(
+        nonce
+      )}), server time: ${now}`;
     }
 
     return crypto.verifySignature(command, signature, pubKey);
@@ -81,8 +83,8 @@ export class LoginController {
   }
 
   logout(req: Request, res: Response) {
-    console.log(req.headers["X-Auth-Token"]);
-    this.removeAuthToken(req.header["X-Auth-Token"]);
+    console.log(req.headers["x-auth-token"]);
+    this.removeAuthToken(req.header["x-auth-token"]);
     // FIXME: add validation on the above header
     return res.status(200).json({});
   }

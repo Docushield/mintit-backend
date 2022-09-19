@@ -62,6 +62,12 @@ export class Collection extends Model {
 
   @Column
   status: string;
+
+  @Column
+  imageUrl: string;
+
+  @Column
+  bannerImageUrl: string;
 }
 
 type MintRoyalties = {

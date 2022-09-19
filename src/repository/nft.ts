@@ -15,7 +15,7 @@ export class NFTRepository {
     this.logger = new APILogger();
   }
 
-  async createNFTCollection(
+  async createNFT(
     nft: {
       collection_id: string;
       request_key: string;
