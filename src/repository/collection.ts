@@ -65,6 +65,37 @@ export class CollectionRepository {
     }
   }
 
+  async updateCollectionImages(
+    slug: string,
+    imageUrl: string | null,
+    bannerImageUrl: string | null,
+    res: Response
+  ) {
+    let data = {};
+    let imageObj,
+      bannerImageObj = {};
+    if (imageUrl != null) imageObj = { imageUrl: imageUrl };
+    if (bannerImageUrl != null)
+      bannerImageObj = { bannerImageUrl: bannerImageUrl };
+    try {
+      data = await this.collectionsRespository.update(
+        { ...imageObj, ...bannerImageObj },
+        {
+          where: {
+            slug: slug,
+          },
+        }
+      );
+    } catch (err) {
+      this.logger.error("Error::" + err);
+      res.status(500).json({
+        error: "error occurred while updating collection status: ",
+        err,
+      });
+    }
+    return data;
+  }
+
   async updateStatus(id: string, status: string, res: Response) {
     let data = {};
     try {
@@ -92,6 +123,20 @@ export class CollectionRepository {
       data = await this.collectionsRespository.findOne({
         where: {
           id: id,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+
+  async findCollectionBySlug(slug: string) {
+    let data: Collection | null = null;
+    try {
+      data = await this.collectionsRespository.findOne({
+        where: {
+          slug: slug,
         },
       });
     } catch (err) {
