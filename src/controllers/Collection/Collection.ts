@@ -122,9 +122,9 @@ export class CollectionController {
     }
     let resp = "NO_URL";
     let bannerResp = resp;
-    if ((req as any).files) {
-      const collectionImage = (req as any).files.collection_image[0];
-      const bannerImage = (req as any).files.collection_banner[0];
+    if (req.files) {
+      const collectionImage = req.files["collection_image"][0];
+      const bannerImage = req.files["collection_banner"][0];
       const imageData = fs.readFileSync(collectionImage.path);
       resp = await s3.uploadFile({
         key: collectionImage.originalname,
