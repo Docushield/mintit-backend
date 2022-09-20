@@ -25,6 +25,7 @@ export const connect = () => {
       acquire: 20000,
       idle: 5000,
     },
+    logging: true,
   });
 
   sequelize.addModels([AuthToken, Collection, NFT]);

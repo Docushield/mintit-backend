@@ -50,6 +50,20 @@ export class CollectionRepository {
         });
         return;
       }
+      if (typeof collection["mint-royalties"] === "string") {
+        collection["mint-royalties"] = JSON.parse(collection["mint-royalties"]);
+      }
+      if (typeof collection["sale-royalties"] === "string") {
+        collection["sale-royalties"] = JSON.parse(collection["sale-royalties"]);
+      }
+      if (typeof collection["token-list"] === "string") {
+        collection["token-list"] = JSON.parse(collection["token-list"]);
+      }
+      if (typeof collection["premint-whitelist"] === "string") {
+        collection["premint-whitelist"] = JSON.parse(
+          collection["premint-whitelist"]
+        );
+      }
       collection["createdAt"] = new Date().toISOString();
       collection["id"] = uuidv4();
       collection["status"] = "pending";
