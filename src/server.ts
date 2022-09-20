@@ -12,11 +12,12 @@ const PORT: Number = 8080;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 // TODO: Update to env variables with real server hosts
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = process.env.ALLOWED_ORIGIN || "*";
 const corsOptions: cors.CorsOptions = {
   origin: allowedOrigins,
 };
 
+app.options("*", cors());
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
