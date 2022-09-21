@@ -66,6 +66,9 @@ export class Collection extends Model {
   status: string;
 
   @Column
+  statusMessage: string;
+
+  @Column
   imageUrl: string;
 
   @Column
