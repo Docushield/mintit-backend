@@ -44,7 +44,7 @@ export const objCustomStringify = (obj: object) => {
   objKeys.forEach((eachKey) => {
     const eachValue = obj[eachKey];
     if (eachKey == "stakeholder-guard") {
-      objStr += `"${eachKey}": (read-msg ${obj["description"]}-guard),`;
+      objStr += `"${eachKey}": (read-msg '${obj["description"]}-guard),`;
     } else {
       objStr += !ignoreDataTypes(eachValue)
         ? Array.isArray(eachValue) && typeof eachValue === "object"

@@ -16,8 +16,8 @@ export const uploadFile = async (file: File) => {
   try {
     const data = await client.upload(uploadParams).promise();
     console.log(data);
-    console.log("Upload Success for: ", data.Key);
-    return data.Key;
+    console.log("Upload Success for: ", data.Key, " at: ", data.Location);
+    return data.Location;
   } catch (err) {
     console.log(
       "Error occurred while uploading file: ",
