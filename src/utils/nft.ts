@@ -1,5 +1,6 @@
 import { Collection, Token } from "../models/collection";
 import { TypedRequestBody } from "../express";
+import { objCustomStringify } from "./serialize";
 
 export const initNFTExpression = (
   body: {
@@ -12,6 +13,9 @@ export const initNFTExpression = (
   let tokenListHashes = body["token-list"].map((val) => {
     return val.hash;
   });
+  const mintRoyaltyData = buildGuards(collection["mint-royalties"]["rates"]);
+  const saleRoyaltyData = buildGuards(collection["sale-royalties"]["rates"]);
+  const data = { ...mintRoyaltyData, ...saleRoyaltyData };
   let expression = `(free.z74plc.init-nft-collection {"creator": "${
     collection.creator
   }", "description": "${collection.description}", "name" : "${
@@ -24,13 +28,35 @@ export const initNFTExpression = (
     collection["premint-whitelist"]
   )}, "size": ${collection.size}, "mint-price": ${collection[
     "mint-price"
-  ].toFixed(2)}, "sale-royalties": ${JSON.stringify(
+  ].toFixed(2)}, "sale-royalties": ${objCustomStringify(
     collection["sale-royalties"]
-  )}, "mint-royalties": ${JSON.stringify(
+  )}, "mint-royalties": ${objCustomStringify(
     collection["mint-royalties"]
   )}, "fungible": coin, "token-list": ${JSON.stringify(tokenListHashes)}})`;
   console.log(expression);
-  return expression;
+  return { expr: expression, env: data };
+};
+
+export const buildGuards = (
+  royalty: [
+    {
+      description: string;
+      "stakeholder-guard": { pred: string; keys: [string] };
+    }
+  ]
+) => {
+  let output = {};
+  royalty.map(function (e) {
+    output[e.description + "-guard"] = e["stakeholder-guard"];
+  });
+  return output;
+};
+
+export const modifyRoyalty = (royalty: [{ description: string }]) => {
+  royalty.map(function (e) {
+    e["stakeholder-guard"] = `(read-msg ${e.description}-guard)`;
+  });
+  return royalty;
 };
 
 export const revealNFTExpression = (

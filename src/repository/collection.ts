@@ -110,11 +110,16 @@ export class CollectionRepository {
     return data;
   }
 
-  async updateStatus(id: string, status: string, res: Response) {
+  async updateStatus(
+    id: string,
+    status: string,
+    statusMessage: string,
+    res: Response
+  ) {
     let data = {};
     try {
       data = await this.collectionsRespository.update(
-        { status: status },
+        { status: status, statusMessage: statusMessage },
         {
           where: {
             id: id,

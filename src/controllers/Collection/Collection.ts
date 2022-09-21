@@ -170,7 +170,7 @@ export class CollectionController {
     );
     if (collection == null) return;
     const expression = NFT.initNFTExpression(req.body, collection);
-    const txResponse = await Kadena.sendTx(expression);
+    const txResponse = await Kadena.sendTx(expression.expr, expression.env);
     if (!txResponse) {
       res
         .status(500)
@@ -203,6 +203,9 @@ export class CollectionController {
       const updatedCollection = this.collectionRepository.updateStatus(
         collection.id,
         listenTxResponse.result.status,
+        listenTxResponse.result.error
+          ? listenTxResponse.result.error.message
+          : listenTxResponse.result.data,
         res
       );
       if (!updatedCollection) return;

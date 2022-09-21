@@ -9,7 +9,7 @@ const networkId = process.env.NETWORK_ID || "testnet04";
 const chainId = process.env.CHAIN_ID || "1";
 const api =
   api_host + "/chainweb/0.0/" + networkId + "/chain/" + chainId + "/pact";
-export const sendTx = async (expression: string, caps = []) => {
+export const sendTx = async (expression: string, envData = {}, caps = []) => {
   let metaInfo = Pact.lang.mkMeta(
     "k:" + kp.publicKey,
     chainId,
@@ -25,6 +25,7 @@ export const sendTx = async (expression: string, caps = []) => {
       meta: metaInfo,
       networkId: networkId,
       caps: caps,
+      envData: envData,
     },
   ];
   console.log(JSON.stringify(cmd));
