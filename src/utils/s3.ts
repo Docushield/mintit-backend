@@ -17,7 +17,7 @@ export const uploadFile = async (file: File) => {
     const data = await client.upload(uploadParams).promise();
     console.log(data);
     console.log("Upload Success for: ", data.Key, " at: ", data.Location);
-    return data.Location;
+    return data.Key;
   } catch (err) {
     console.log(
       "Error occurred while uploading file: ",
@@ -55,4 +55,10 @@ export const uploadFileByPath = async (multerFile: Express.Multer.File) => {
     content: content,
     type: multerFile.mimetype,
   });
+};
+
+export const buildUrl = (key: string) => {
+  const region = process.env.AWS_DEFAULT_REGION || "us-east-2";
+
+  return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
 };

@@ -60,6 +60,8 @@ export class CollectionController {
       res.status(400).json({ error: "No Collection found." });
       return;
     }
+    nft["imageUrl"] = s3.buildUrl(nft["imageUrl"]);
+    nft["bannerImageUrl"] = s3.buildUrl(nft["bannerImageUrl"]);
     res.status(200).json(nft);
     return;
   }
