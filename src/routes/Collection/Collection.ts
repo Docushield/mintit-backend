@@ -1,7 +1,17 @@
 import express, { Request, Response } from "express";
 import { collectionController } from "../../controllers";
 import multer from "multer";
-const upload = multer({ dest: "uploads/" });
+//const upload = multer({ dest: "uploads/" });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 1000000000, files: 2 },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      return cb(new Error("Please upload a valid image file"));
+    }
+    cb(null, true);
+  },
+});
 
 export const router = express.Router({
   strict: true,

@@ -9,7 +9,7 @@ export const uploadFile = async (file: File) => {
   const uploadParams = {
     Bucket: bucketName,
     Key: file.key,
-    ContentType: file.type,
+    //ContentType: file.type,
     Body: file.content,
     ACL: "public-read",
   };
@@ -49,7 +49,8 @@ export const getFile = async (key: string) => {
 
 export const uploadFileByPath = async (multerFile: Express.Multer.File) => {
   const client = new AWS.S3();
-  const content = fs.readFileSync(multerFile.path).toString();
+  const content = multerFile.buffer;
+  console.log("Image content buffer size: ", content.length);
   return uploadFile({
     key: multerFile.originalname,
     content: content,
@@ -59,6 +60,5 @@ export const uploadFileByPath = async (multerFile: Express.Multer.File) => {
 
 export const buildUrl = (key: string) => {
   const region = process.env.AWS_DEFAULT_REGION || "us-east-2";
-
   return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
 };

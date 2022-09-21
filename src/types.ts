@@ -1,5 +1,5 @@
 export type File = {
   key: string;
-  content: string;
+  content: Buffer;
   type: string;
 };
