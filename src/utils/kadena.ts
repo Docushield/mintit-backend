@@ -5,7 +5,6 @@ const kp = {
   secretKey: process.env.SECRET_KEY,
 };
 
-const contractName = process.env.CONTRACT_NAME || "free.z74plc"
 const senderAccount = `k:${kp.publicKey}`;
 const apiHost = process.env.API_HOST || "https://api.testnet.chainweb.com";
 const networkId = process.env.NETWORK_ID || "testnet04";
@@ -72,8 +71,8 @@ export const listenTx = async (requestKey: string) => {
   }
 };
 
-const apiPost = async (route, payload) =>
-  fetch(`${apiEndpoint}/v1/api/${route}`, {
+export const apiPost = async (route, payload) =>
+  fetch(`${apiEndpoint}/api/v1/${route}`, {
     method: "POST",
     headers: {
         "Content-Type": "application/json",
@@ -81,9 +80,9 @@ const apiPost = async (route, payload) =>
     body: JSON.stringify(payload),
 });
 
-const send = async (payload) => await (await apiPost("send", payload)).json()
+export const send = async (payload) => await (await apiPost("send", payload)).json()
 
-const mkGuard = (publicKey) => {
+export const mkGuard = (publicKey) => {
   return {
     "keys":[publicKey],
     "pred":"keys-all"
@@ -112,11 +111,22 @@ const prepareSigningCmd = (pactCode, data, caps) => {
   }
 }
 
-const signCmd = (cmd) => Pact.crypto.sign(JSON.stringify(cmd), kp);
+export const signCmd = (cmd) => Pact.crypto.sign(JSON.stringify(cmd), kp);
 
-const mkCmd = (pactCode, data, caps) => {
+export const mkCmd = (pactCode, data, caps) => {
   const signingCmd = prepareSigningCmd(pactCode, data, caps)
   const sig = signCmd(signingCmd)
 
   return Pact.api.mkSingleCmd([sig], JSON.stringify(signingCmd))
+}
+
+export const mkCap = (role, description, name, args) => {
+  return {
+    role,
+    description,
+    cap: {
+      name, 
+      args
+    }
+  }
 }
