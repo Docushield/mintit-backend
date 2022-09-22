@@ -163,4 +163,18 @@ export class CollectionRepository {
     }
     return data;
   }
+
+  async findCollectionByProvenanceHash(hash: string) {
+    let data: Collection | null = null;
+    try {
+      data = await this.collectionsRespository.findOne({
+        where: {
+          "provenance-hash": hash,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
 }

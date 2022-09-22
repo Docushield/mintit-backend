@@ -45,6 +45,32 @@ export class CollectionController {
     return;
   }
 
+  async getCollectionByHash(req: Request, res: Response) {
+    const tokenU = req.headers["x-auth-token"];
+    const isAuthenticated = await this.authTokenRespository.validateToken(
+      tokenU,
+      res
+    );
+    if (!isAuthenticated) {
+      return;
+    }
+    const hash = req.query["hash"];
+    if (typeof hash == "string") {
+      const nft =
+        await this.collectionRepository.findCollectionByProvenanceHash(hash);
+      if (!nft) {
+        res.status(400).json({ error: "No Collection found." });
+        return;
+      }
+      nft["imageUrl"] = s3.buildUrl(nft["imageUrl"]);
+      nft["bannerImageUrl"] = s3.buildUrl(nft["bannerImageUrl"]);
+      res.status(200).json(nft);
+      return;
+    }
+    res.status(400).json({ error: "hash in query param is not string" });
+    return;
+  }
+
   async getCollection(req: Request, res: Response) {
     const tokenU = req.headers["x-auth-token"];
     const isAuthenticated = await this.authTokenRespository.validateToken(
