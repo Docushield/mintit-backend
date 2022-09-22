@@ -25,6 +25,8 @@ export class Collection extends Model {
   @Column
   description: string;
 
+  @Unique
+  @AllowNull(false)
   @Column
   name: string;
 

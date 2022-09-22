@@ -186,6 +186,7 @@ export class CollectionController {
             collection_id: collection.id,
             owner: null,
             spec: token["spec"],
+            hash: token.hash,
           },
           res
         );

@@ -163,4 +163,18 @@ export class CollectionRepository {
     }
     return data;
   }
+
+  async findCollectionByName(name: string) {
+    let data: Collection | null = null;
+    try {
+      data = await this.collectionsRespository.findOne({
+        where: {
+          name: name,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
 }
