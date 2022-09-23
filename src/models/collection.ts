@@ -31,6 +31,8 @@ export class Collection extends Model {
   @Column
   type: string;
 
+  @Unique
+  @AllowNull(false)
   @Column
   "provenance-hash": string;
 
