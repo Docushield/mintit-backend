@@ -23,7 +23,7 @@ export class NFT extends Model {
 
   @ForeignKey(() => Collection)
   @Column
-  collection_id: string;
+  collectionId: string;
 
   @Column
   owner: string;
@@ -47,5 +47,8 @@ export class NFT extends Model {
   @Unique
   @AllowNull(false)
   @Column
-  hash: number;
+  hash: string;
+
+  @Column(DataType.JSONB)
+  contentUri: object;
 }
