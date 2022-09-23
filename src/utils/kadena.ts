@@ -130,7 +130,8 @@ const apiPost = async (route, payload) =>
     body: JSON.stringify(payload),
   });
 
-export const send = async (payload) => await (await apiPost("send", payload)).json();
+export const send = async (payload) =>
+  await (await apiPost("send", payload)).json();
 
 const mkGuard = (publicKey) => {
   return {

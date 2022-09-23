@@ -5,17 +5,17 @@ const contractNamespace = process.env.CONTRACT_NAMESPACE || "free";
 const contractName = process.env.CONTRACT_NAME || "z74plc";
 
 export const revealNft = (
-    collection: Collection,
-    token: {
-      hash: string;
-      spec: object;
-      content_uri: { scheme: string; data: string };
-    }
-  ) => {
-    const tokenName = `${collection.name} #1234`;
-    const marmaladeTokenId = `t:${token.hash}`;
+  collection: Collection,
+  token: {
+    hash: string;
+    spec: object;
+    content_uri: { scheme: string; data: string };
+  }
+) => {
+  const tokenName = `${collection.name} #1234`;
+  const marmaladeTokenId = `t:${token.hash}`;
 
-    const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
+  const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
       "name": "${tokenName}",
       "description": "${collection.description} token description",
       "content-hash": "${token.hash}",
@@ -30,21 +30,22 @@ export const revealNft = (
       "creator": "${collection.creator}"
     })`;
 
-    // TODO: Use token owner from minted token
-    const tokenOwner = "k:f6abd552229466ae01216368864b475481d8d222665e3f533825b399653bc41d"
+  // TODO: Use token owner from minted token
+  const tokenOwner =
+    "k:f6abd552229466ae01216368864b475481d8d222665e3f533825b399653bc41d";
 
-    const caps = [
-      mkCap("Gas Payer", "Gas Payer", "coin.GAS", []),
-      mkCap("Marmalade Mint", "Marmalade Mint", "marmalade.ledger.MINT", [
-        marmaladeTokenId,
-        tokenOwner,
-        1
-      ])
-    ]
+  const caps = [
+    mkCap("Gas Payer", "Gas Payer", "coin.GAS", []),
+    mkCap("Marmalade Mint", "Marmalade Mint", "marmalade.ledger.MINT", [
+      marmaladeTokenId,
+      tokenOwner,
+      1,
+    ]),
+  ];
 
-    const data = null;
+  const data = null;
 
-    const command = mkCmd(pactCode, data, caps);
+  const command = mkCmd(pactCode, data, caps);
 
-    return send({cmds: [command]});
-  }
+  return send({ cmds: [command] });
+};
