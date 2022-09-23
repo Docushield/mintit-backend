@@ -110,8 +110,9 @@ export const checkMintTokenOnChain = async () => {
       ) {
         console.log("Found our mint nft event: ", JSON.stringify(p));
         const obj = p.params[0];
-        const nft = await nftRepository.updateMintedAt(
+        const nft = await nftRepository.updateMintedAtAndIndex(
           obj["content-hash"],
+          obj["mint-index"],
           p.height
         );
         console.log(
