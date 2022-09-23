@@ -10,17 +10,13 @@ const senderAccount = `k:${kp.publicKey}`;
 const apiHost = process.env.API_HOST || "https://api.testnet.chainweb.com";
 const networkId = process.env.NETWORK_ID || "testnet04";
 const chainId = process.env.CHAIN_ID || "1";
-const api =
-  apiHost + "/chainweb/0.0/" + networkId + "/chain/" + chainId + "/pact";
 const K = parseInt(process.env.EVENT_WINDOW_SIZE || "10") || 10;
-const contractName = process.env.CONTRACT_NAME || "z74plc";
-const namespaceName = process.env.CONTRACT_NAMESPACE_NAME || "free";
 const initBlockHeight =
   parseInt(process.env.INIT_BLOCK_HEIGHT || "2572069") || 2572069;
 
 const gasPrice = process.env.GAS_PRICE || 0.00000001;
 const gasLimit = process.env.GAS_LIMIT || 100000;
-const apiEndpoint =
+export const apiEndpoint =
   apiHost + "/chainweb/0.0/" + networkId + "/chain/" + chainId + "/pact";
 export const sendTx = async (expression: string, envData = {}, caps = []) => {
   let metaInfo = Pact.lang.mkMeta(
@@ -134,7 +130,7 @@ const apiPost = async (route, payload) =>
     body: JSON.stringify(payload),
   });
 
-const send = async (payload) => await (await apiPost("send", payload)).json();
+export const send = async (payload) => await (await apiPost("send", payload)).json();
 
 const mkGuard = (publicKey) => {
   return {
@@ -176,7 +172,7 @@ const prepareSigningCmd = (pactCode, data, caps) => {
 
 const signCmd = (cmd) => Pact.crypto.sign(JSON.stringify(cmd), kp);
 
-const mkCmd = (pactCode, data, caps) => {
+export const mkCmd = (pactCode, data, caps) => {
   const signingCmd = prepareSigningCmd(pactCode, data, caps);
   const sig = signCmd(signingCmd);
 
