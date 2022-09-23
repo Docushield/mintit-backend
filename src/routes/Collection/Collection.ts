@@ -48,3 +48,7 @@ router.get("/reveal/:id", (req: Request, res: Response) => {
 router.get("/:slug", (req: Request, res: Response) => {
   collectionController.getCollection(req, res);
 });
+
+router.get("/", (req: Request, res: Response) => {
+  collectionController.getCollectionByHash(req, res);
+});

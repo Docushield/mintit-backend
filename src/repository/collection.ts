@@ -164,12 +164,12 @@ export class CollectionRepository {
     return data;
   }
 
-  async findCollectionByName(name: string) {
+  async findCollectionByProvenanceHash(hash: string) {
     let data: Collection | null = null;
     try {
       data = await this.collectionsRespository.findOne({
         where: {
-          name: name,
+          "provenance-hash": hash,
         },
       });
     } catch (err) {

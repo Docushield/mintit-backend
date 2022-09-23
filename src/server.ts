@@ -9,7 +9,7 @@ import * as Kadena from "./utils/kadena";
 
 const app = express();
 const PORT: Number = 8080;
-const mintInterval = parseInt(process.env.MINT_INTERVAL_SECONDS || "30") || 30;
+const pollInterval = parseInt(process.env.POLL_INTERVAL_SECONDS || "30") || 30;
 
 // required for connect with testnet.
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -41,4 +41,4 @@ app.listen(PORT, () => {
 });
 
 // Listening on the blockchain for the events.
-setInterval(Kadena.checkMintTokenOnChain, mintInterval * 1000);
+setInterval(Kadena.checkMintTokenOnChain, pollInterval * 1000);
