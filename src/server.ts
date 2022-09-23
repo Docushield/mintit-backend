@@ -4,9 +4,12 @@ import cors from "cors";
 import * as bodyParser from "body-parser";
 import { loginRouter, collectionRouter } from "./routes";
 import multer from "multer";
+import Pact from "pact-lang-api";
+import * as Kadena from "./utils/kadena";
 
 const app = express();
 const PORT: Number = 8080;
+const pollInterval = parseInt(process.env.POLL_INTERVAL_SECONDS || "30") || 30;
 
 // required for connect with testnet.
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -36,3 +39,6 @@ app.listen(PORT, () => {
     "The application is listening " + "on port http://localhost:" + PORT
   );
 });
+
+// Listening on the blockchain for the events.
+setInterval(Kadena.checkMintTokenOnChain, pollInterval * 1000);

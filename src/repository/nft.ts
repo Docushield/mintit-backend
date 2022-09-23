@@ -3,6 +3,7 @@ import { APILogger } from "../logger/api";
 import { NFT } from "../models/nft";
 import { v4 as uuidv4 } from "uuid";
 import { Response } from "express";
+import { Sequelize } from "sequelize";
 
 export class NFTRepository {
   private logger: APILogger;
@@ -20,6 +21,7 @@ export class NFTRepository {
       collection_id: string;
       owner: string | null;
       spec: object;
+      hash: string;
     },
     res: Response
   ) {
@@ -35,6 +37,23 @@ export class NFTRepository {
         .json({ error: "error occurred while creating nft collection: ", err });
       return;
     }
+  }
+
+  async updateMintedAt(hash: string, mintedAt: number) {
+    let data = {};
+    try {
+      data = await this.nftRepository.update(
+        { mintedAt: mintedAt },
+        {
+          where: {
+            hash: hash,
+          },
+        }
+      );
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
   }
 
   async updateStatus(id: string, status: string, res: Response) {
@@ -68,6 +87,23 @@ export class NFTRepository {
       });
     } catch (err) {
       this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+
+  async findLatestMintAt() {
+    let data = 0;
+    try {
+      data = await this.nftRepository.findAll({
+        attributes: [Sequelize.fn("MAX", Sequelize.col("mintedAt"))],
+      });
+      if (isNaN(data)) {
+        data = 0;
+      }
+    } catch (err) {
+      this.logger.error(
+        "Error occurred while finding latest mint block height: " + err
+      );
     }
     return data;
   }

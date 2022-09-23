@@ -9,6 +9,8 @@ import {
   DataType,
   ForeignKey,
   CreatedAt,
+  AllowNull,
+  Unique,
 } from "sequelize-typescript";
 
 @Table({
@@ -35,4 +37,15 @@ export class NFT extends Model {
   @CreatedAt
   @Column
   createdAt: string;
+
+  @Column
+  mintedAt: number;
+
+  @Column
+  revealedAt: number;
+
+  @Unique
+  @AllowNull(false)
+  @Column
+  hash: number;
 }
