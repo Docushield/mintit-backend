@@ -92,6 +92,26 @@ export class CollectionController {
     return;
   }
 
+  async getNFTTokens(req: Request, res: Response) {
+    const tokenU = req.headers["x-auth-token"];
+    const isAuthenticated = await this.authTokenRespository.validateToken(
+      tokenU,
+      res
+    );
+    if (!isAuthenticated) {
+      return;
+    }
+    const id = req.params["slug"];
+    const nft = await this.collectionRepository.findCollectionBySlug(id);
+    if (!nft) {
+      res.status(400).json({ error: "No Collection found." });
+      return;
+    }
+    const nftTokens = await this.nftRepository.findNFTByCollectionId(nft.id);
+    res.status(200).json(nftTokens);
+    return;
+  }
+
   async revealNFT(req: Request, res: Response) {
     const tokenU = req.headers["x-auth-token"];
     const isAuthenticated = await this.authTokenRespository.validateToken(
@@ -209,10 +229,11 @@ export class CollectionController {
       for (const token of collection["token-list"]) {
         const nftCollection = await this.nftRepository.createNFT(
           {
-            collection_id: collection.id,
+            collectionId: collection.id,
             owner: null,
             spec: token["spec"],
             hash: token.hash,
+            contentUri: token["content_uri"],
           },
           res
         );
