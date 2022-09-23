@@ -51,4 +51,7 @@ export class NFT extends Model {
 
   @Column(DataType.JSONB)
   contentUri: object;
+
+  @Column
+  index: number;
 }

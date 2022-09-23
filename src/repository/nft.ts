@@ -40,11 +40,11 @@ export class NFTRepository {
     }
   }
 
-  async updateMintedAt(hash: string, mintedAt: number) {
+  async updateMintedAtAndIndex(hash: string, index: number, mintedAt: number) {
     let data = {};
     try {
       data = await this.nftRepository.update(
-        { mintedAt: mintedAt },
+        { mintedAt: mintedAt, index: index },
         {
           where: {
             hash: hash,
