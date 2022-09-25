@@ -18,10 +18,11 @@ export class NFTRepository {
 
   async createNFT(
     nft: {
-      collection_id: string;
+      collectionId: string;
       owner: string | null;
       spec: object;
       hash: string;
+      contentUri: object;
     },
     res: Response
   ) {
@@ -39,11 +40,11 @@ export class NFTRepository {
     }
   }
 
-  async updateMintedAt(hash: string, mintedAt: number) {
+  async updateMintedAtAndIndex(hash: string, index: number, mintedAt: number) {
     let data = {};
     try {
       data = await this.nftRepository.update(
-        { mintedAt: mintedAt },
+        { mintedAt: mintedAt, index: index },
         {
           where: {
             hash: hash,
@@ -77,12 +78,12 @@ export class NFTRepository {
     return data;
   }
 
-  async findNFTCollection(id: string) {
-    let data: NFT | null = null;
+  async findNFTByCollectionId(id: string) {
+    let data: [NFT] | null = null;
     try {
-      data = await this.nftRepository.findOne({
+      data = await this.nftRepository.findAll({
         where: {
-          id: id,
+          collectionId: id,
         },
       });
     } catch (err) {
