@@ -1,8 +1,14 @@
 import { Collection, Token } from "../models/collection";
-import { send, mkCap, mkCmd } from "./kadena";
+import { send, mkCap, mkCmd, chainId, networkId, apiHost } from "./kadena";
+import { NFTRepository } from "../repository/nft";
+import Pact from "pact-lang-api";
 
 const contractNamespace = process.env.CONTRACT_NAMESPACE || "free";
 const contractName = process.env.CONTRACT_NAME || "z74plc";
+
+const mintTrackingBatchSize = parseInt(process.env.MINT_TRACKING_BATCH_SIZE || "10") || 10;
+const initBlockHeight =
+  parseInt(process.env.INIT_BLOCK_HEIGHT || "2572069") || 2572069;  
 
 export const revealNft = (
   collection: Collection,
@@ -48,4 +54,49 @@ export const revealNft = (
   const command = mkCmd(pactCode, data, caps);
 
   return send({ cmds: [command] });
+};
+
+const nftRepository = new NFTRepository();
+
+export const checkMintTokenOnChain = async () => {
+  const latestBlockHeight = await nftRepository.findLatestMintAt();
+  const blockFrom = Math.max(initBlockHeight, latestBlockHeight);
+  const blockTo = blockFrom + mintTrackingBatchSize;
+  console.log(
+    "started listening on blockchain for latest mint events from: " +
+      blockFrom +
+      " to: " +
+      blockTo
+  );
+  const data = await Pact.event.range(
+    chainId,
+    blockFrom,
+    blockTo,
+    networkId,
+    apiHost
+  );
+  console.log("Found " + data.length + " events from blockchain");
+  await Promise.all(
+    data.map(async function (p) {
+      if (
+        p.module.name == contractName &&
+        p.module.namespace == contractNamespace &&
+        p.name == "MINT_NFT_EVENT" &&
+        p.params
+      ) {
+        console.log("Found our mint nft event: ", JSON.stringify(p));
+        const obj = p.params[0];
+        const nft = await nftRepository.updateMintedAt(
+          obj["content-hash"],
+          p.height
+        );
+        console.log(
+          "Updated minted at for nft with hash: ",
+          obj["content-hash"],
+          " with value: ",
+          p.height
+        );
+      }
+    })
+  );
 };
