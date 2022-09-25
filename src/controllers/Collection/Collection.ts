@@ -9,7 +9,7 @@ import { TokenStatus } from "../../models/authtoken";
 import { lang, crypto } from "pact-lang-api";
 import Pact from "pact-lang-api";
 import * as Kadena from "../../utils/kadena";
-import * as SmartContract from "../../utils/smart_contract"; 
+import * as SmartContract from "../../utils/smart_contract";
 import * as NFT from "../../utils/nft";
 import fs from "fs";
 import * as s3 from "../../utils/s3";
@@ -131,7 +131,7 @@ export class CollectionController {
     let requestKeys = [];
     for (const token of collection["token-list"]) {
       const txResponse = await SmartContract.revealNft(collection, token);
-      
+
       if (txResponse == null) {
         console.log("error occurred while sending tx for token: ", token.hash);
       } else {

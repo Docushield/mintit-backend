@@ -9,10 +9,11 @@ const kp = {
 const kp_caps = {
   publicKey: process.env.PUBLIC_KEY_CAPS,
   secretKey: process.env.SECRET_KEY_CAPS,
-}
+};
 
 const senderAccount = `k:${kp.publicKey}`;
-export const apiHost = process.env.API_HOST || "https://api.testnet.chainweb.com";
+export const apiHost =
+  process.env.API_HOST || "https://api.testnet.chainweb.com";
 export const networkId = process.env.NETWORK_ID || "testnet04";
 export const chainId = process.env.CHAIN_ID || "1";
 const gasPrice = process.env.GAS_PRICE || 0.00000001;
@@ -116,9 +117,9 @@ const prepareSigningCmd = (pactCode, data, caps) => {
 
   if (caps.length > 0) {
     signers.push({
-      pubKey: kp_caps.publicKey, 
-      clist: caps
-    })
+      pubKey: kp_caps.publicKey,
+      clist: caps,
+    });
   }
 
   const payload = {
@@ -137,7 +138,8 @@ const prepareSigningCmd = (pactCode, data, caps) => {
   };
 };
 
-const signCmd = (cmd, keyPair) => Pact.crypto.sign(JSON.stringify(cmd), keyPair);
+const signCmd = (cmd, keyPair) =>
+  Pact.crypto.sign(JSON.stringify(cmd), keyPair);
 
 export const mkCmd = (pactCode, data, caps) => {
   const signingCmd = prepareSigningCmd(pactCode, data, caps);
@@ -145,7 +147,7 @@ export const mkCmd = (pactCode, data, caps) => {
   const sigs = [sig];
 
   if (caps.length > 0) {
-    sigs.push(signCmd(signingCmd, kp_caps))
+    sigs.push(signCmd(signingCmd, kp_caps));
   }
 
   return Pact.api.mkSingleCmd(sigs, JSON.stringify(signingCmd));
@@ -153,8 +155,7 @@ export const mkCmd = (pactCode, data, caps) => {
 
 export const mkCap = (role, description, name, args) => {
   return {
-    name, 
-    args
-  }
+    name,
+    args,
+  };
 };
-

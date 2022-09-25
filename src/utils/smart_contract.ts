@@ -6,17 +6,18 @@ import Pact from "pact-lang-api";
 const contractNamespace = process.env.CONTRACT_NAMESPACE || "free";
 const contractName = process.env.CONTRACT_NAME || "z74plc";
 
-const mintTrackingBatchSize = parseInt(process.env.MINT_TRACKING_BATCH_SIZE || "10") || 10;
+const mintTrackingBatchSize =
+  parseInt(process.env.MINT_TRACKING_BATCH_SIZE || "10") || 10;
 const initBlockHeight =
-  parseInt(process.env.INIT_BLOCK_HEIGHT || "2572069") || 2572069;  
+  parseInt(process.env.INIT_BLOCK_HEIGHT || "2572069") || 2572069;
 
 export const revealNft = (
   collection: Collection,
   token: {
-    hash: string,
-    spec: object,
-    content_uri: { scheme: string; data: string },
-    index: number
+    hash: string;
+    spec: object;
+    content_uri: { scheme: string; data: string };
+    index: number;
   }
 ) => {
   const tokenName = `${collection.name} ${token.index}`;
