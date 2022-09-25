@@ -58,11 +58,18 @@ export const revealNft = (
 };
 
 const nftRepository = new NFTRepository();
+let lastBlockHeight = initBlockHeight;
 
 export const checkMintTokenOnChain = async () => {
   const latestBlockHeight = await nftRepository.findLatestMintAt();
-  const blockFrom = Math.max(initBlockHeight, latestBlockHeight);
+  const blockFrom = Math.max(
+    initBlockHeight,
+    latestBlockHeight == 0
+      ? lastBlockHeight
+      : Math.min(lastBlockHeight, latestBlockHeight)
+  );
   const blockTo = blockFrom + mintTrackingBatchSize;
+  lastBlockHeight = blockTo;
   console.log(
     "started listening on blockchain for latest mint events from: " +
       blockFrom +
