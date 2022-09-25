@@ -58,26 +58,3 @@ export const modifyRoyalty = (royalty: [{ description: string }]) => {
   });
   return royalty;
 };
-
-export const revealNFTExpression = (
-  collection: Collection,
-  token: {
-    hash: string;
-    spec: object;
-    content_uri: { scheme: string; data: string };
-  }
-) => {
-  let expression = `(free.z74plc.reveal-nft { "name": "${
-    collection.name
-  }", "description": "${collection.description}", "content-hash": "${
-    token.hash
-  }", "spec": ${JSON.stringify(token.spec)}, "collection-name": "${
-    collection.name
-  }", "content-uri": (kip.token-manifest.uri "${
-    token["content_uri"].scheme
-  }" "${token["content_uri"].data}"), "marmalade-token-id": "t:${
-    token.hash
-  }", "edition": 1, "creator": "${collection.creator}" })`;
-  console.log(expression);
-  return expression;
-};

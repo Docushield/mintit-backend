@@ -13,12 +13,13 @@ const initBlockHeight =
 export const revealNft = (
   collection: Collection,
   token: {
-    hash: string;
-    spec: object;
-    content_uri: { scheme: string; data: string };
+    hash: string,
+    spec: object,
+    content_uri: { scheme: string; data: string },
+    index: number
   }
 ) => {
-  const tokenName = `${collection.name} #1234`;
+  const tokenName = `${collection.name} ${token.index}`;
   const marmaladeTokenId = `t:${token.hash}`;
 
   const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
