@@ -6,9 +6,10 @@ import Pact from "pact-lang-api";
 const contractNamespace = process.env.CONTRACT_NAMESPACE || "free";
 const contractName = process.env.CONTRACT_NAME || "z74plc";
 
-const mintTrackingBatchSize = parseInt(process.env.MINT_TRACKING_BATCH_SIZE || "10") || 10;
+const mintTrackingBatchSize =
+  parseInt(process.env.MINT_TRACKING_BATCH_SIZE || "10") || 10;
 const initBlockHeight =
-  parseInt(process.env.INIT_BLOCK_HEIGHT || "2572069") || 2572069;  
+  parseInt(process.env.INIT_BLOCK_HEIGHT || "2572069") || 2572069;
 
 export const revealNft = (
   collection: Collection,
@@ -86,8 +87,9 @@ export const checkMintTokenOnChain = async () => {
       ) {
         console.log("Found our mint nft event: ", JSON.stringify(p));
         const obj = p.params[0];
-        const nft = await nftRepository.updateMintedAt(
+        const nft = await nftRepository.updateMintedAtAndIndex(
           obj["content-hash"],
+          obj["mint-index"],
           p.height
         );
         console.log(
