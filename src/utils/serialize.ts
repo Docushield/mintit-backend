@@ -1,35 +1,35 @@
-const isNotNumber = (value) => {
+const isNotNumber = (value: any) => {
   return typeof value === "number" && isNaN(value);
 };
 
-const isInfinity = (value) => {
+const isInfinity = (value: any) => {
   return typeof value === "number" && !isFinite(value);
 };
 
-const isNull = (value) => {
+const isNull = (value: any) => {
   return value === null && typeof value === "object";
 };
 
-const nullDataTypes = (value) => {
+const nullDataTypes = (value: any) => {
   return isNotNumber(value) || isInfinity(value) || isNull(value);
 };
-const isUndefined = (value) => {
+const isUndefined = (value: any) => {
   return value === undefined && typeof value === "undefined";
 };
 
-const isFunction = (value) => {
+const isFunction = (value: any) => {
   return typeof value === "function";
 };
 
-const isSymbol = (value) => {
+const isSymbol = (value: any) => {
   return typeof value === "symbol";
 };
 
-const ignoreDataTypes = (value) => {
+const ignoreDataTypes = (value: any) => {
   return isUndefined(value) || isFunction(value) || isSymbol(value);
 };
 
-const removeComma = (str) => {
+const removeComma = (str: string) => {
   const tempArr = str.split("");
   tempArr.pop();
   return tempArr.join("");
@@ -58,7 +58,7 @@ export const objCustomStringify = (obj: object) => {
 
 export const customStringify = (obj: [object]) => {
   let arrStr = "";
-  const arrayValuesNullTypes = (value) => {
+  const arrayValuesNullTypes = (value: any) => {
     return (
       isNotNumber(value) ||
       isInfinity(value) ||

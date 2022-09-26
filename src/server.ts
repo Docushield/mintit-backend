@@ -6,11 +6,13 @@ import { loginRouter, collectionRouter } from "./routes";
 import multer from "multer";
 import Pact from "pact-lang-api";
 import * as Kadena from "./utils/kadena";
-import { checkMintTokenOnChain } from "./utils/smart_contract";
+import { checkMintTokenOnChain, checkRevealTime } from "./utils/smart_contract";
 
 const app = express();
 const PORT: Number = 8080;
 const pollInterval = parseInt(process.env.POLL_INTERVAL_SECONDS || "30") || 30;
+const revealPollInterval =
+  parseInt(process.env.REVEAL_POLL_INTERVAL_SECONDS || "600") || 600;
 
 // required for connect with testnet.
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -43,3 +45,6 @@ app.listen(PORT, () => {
 
 // Listening on the blockchain for the events.
 setInterval(checkMintTokenOnChain, pollInterval * 1000);
+
+// Loop to check for any old tokens yet to be revealed and reveal them.
+setInterval(checkRevealTime, revealPollInterval * 1000);

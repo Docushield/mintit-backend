@@ -3,6 +3,7 @@ import { APILogger } from "../logger/api";
 import { Collection } from "../models/collection";
 import { v4 as uuidv4 } from "uuid";
 import { Response } from "express";
+import { Op } from "sequelize";
 
 export class CollectionRepository {
   private logger: APILogger;
@@ -31,6 +32,7 @@ export class CollectionRepository {
         "provenance-hash",
         "mint-starts",
         "premint-ends",
+        "reveal-at",
         "premint-whitelist",
         "size",
         "mint-price",
@@ -170,6 +172,22 @@ export class CollectionRepository {
       data = await this.collectionsRespository.findOne({
         where: {
           "provenance-hash": hash,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+
+  async findCollectionLessThanReveal(revealAt: string) {
+    let data: [Collection] | null = null;
+    try {
+      data = await this.collectionsRespository.findAll({
+        where: {
+          "reveal-at": {
+            [Op.lte]: revealAt,
+          },
         },
       });
     } catch (err) {

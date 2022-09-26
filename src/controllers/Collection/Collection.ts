@@ -129,7 +129,8 @@ export class CollectionController {
       return;
     }
     let requestKeys = [];
-    for (const token of collection["token-list"]) {
+    const tokens = (await this.nftRepository.findNFTByCollectionId(id)) || [];
+    for (const token of tokens) {
       const txResponse = await SmartContract.revealNft(collection, token);
 
       if (txResponse == null) {
