@@ -40,15 +40,21 @@ export class NFTRepository {
     }
   }
 
-  async updateMintedAtAndIndex(hash: string, index: number, mintedAt: number) {
-    let data = {};
+  async updateMintedAtAndIndexWithOwner(
+    hash: string,
+    index: number,
+    owner: string,
+    mintedAt: number
+  ) {
+    let data: [NFT] | null = null;
     try {
       data = await this.nftRepository.update(
-        { mintedAt: mintedAt, index: index },
+        { mintedAt: mintedAt, index: index, owner: owner },
         {
           where: {
             hash: hash,
           },
+          returning: true,
         }
       );
     } catch (err) {
@@ -74,6 +80,21 @@ export class NFTRepository {
         error: "error occurred while updating nft collection status: ",
         err,
       });
+    }
+    return data;
+  }
+
+  async findNFTByCollectionIdAndNullReveal(id: string) {
+    let data: [NFT] | null = null;
+    try {
+      data = await this.nftRepository.findAll({
+        where: {
+          collectionId: id,
+          revealedAt: null,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
     }
     return data;
   }
@@ -105,6 +126,23 @@ export class NFTRepository {
       this.logger.error(
         "Error occurred while finding latest mint block height: " + err
       );
+    }
+    return data;
+  }
+
+  async updateRevealedAt(id: string, revealedAt: number) {
+    let data = {};
+    try {
+      data = await this.nftRepository.update(
+        { revealedAt: revealedAt },
+        {
+          where: {
+            id: id,
+          },
+        }
+      );
+    } catch (err) {
+      this.logger.error("Error while updating reveledAt: " + err);
     }
     return data;
   }

@@ -1,6 +1,15 @@
 import { Collection, Token } from "../models/collection";
-import { send, mkCap, mkCmd, chainId, networkId, apiHost } from "./kadena";
+import {
+  send,
+  mkCap,
+  mkCmd,
+  chainId,
+  networkId,
+  apiHost,
+  listenTx,
+} from "./kadena";
 import { NFTRepository } from "../repository/nft";
+import { CollectionRepository } from "../repository/collection";
 import Pact from "pact-lang-api";
 
 const contractNamespace = process.env.CONTRACT_NAMESPACE || "free";
@@ -16,8 +25,9 @@ export const revealNft = (
   token: {
     hash: string;
     spec: object;
-    content_uri: { scheme: string; data: string };
+    contentUri: { scheme: string; data: string };
     index: number;
+    owner: string;
   }
 ) => {
   const tokenName = `${collection.name} ${token.index}`;
@@ -30,17 +40,15 @@ export const revealNft = (
       "spec": ${JSON.stringify(token.spec)},
       "collection-name" :"${collection.name}",
       "content-uri": (kip.token-manifest.uri 
-          "${token["content-uri"].scheme}" 
-          "${token["content-uri"].data}"
+          "${token.contentUri.scheme}" 
+          "${token.contentUri.data}"
         ),
       "marmalade-token-id": "${marmaladeTokenId}",
       "edition": 1,
       "creator": "${collection.creator}"
     })`;
 
-  // TODO: Use token owner from minted token
-  const tokenOwner =
-    "k:f6abd552229466ae01216368864b475481d8d222665e3f533825b399653bc41d";
+  const tokenOwner = token.owner;
 
   const caps = [
     mkCap("Gas Payer", "Gas Payer", "coin.GAS", []),
@@ -59,6 +67,7 @@ export const revealNft = (
 };
 
 const nftRepository = new NFTRepository();
+const collectionRepository = new CollectionRepository();
 let lastBlockHeight = initBlockHeight;
 
 export const checkMintTokenOnChain = async () => {
@@ -95,18 +104,98 @@ export const checkMintTokenOnChain = async () => {
       ) {
         console.log("Found our mint nft event: ", JSON.stringify(p));
         const obj = p.params[0];
-        const nft = await nftRepository.updateMintedAtAndIndex(
+        const nft = await nftRepository.updateMintedAtAndIndexWithOwner(
           obj["content-hash"],
           obj["mint-index"],
+          obj["current-owner"],
           p.height
         );
-        console.log(
-          "Updated minted at for nft with hash: ",
-          obj["content-hash"],
-          " with value: ",
-          p.height
-        );
+        if (nft) {
+          console.log(
+            "Updated minted at for nft with hash: ",
+            obj["content-hash"],
+            " with value: ",
+            p.height
+          );
+          const collection = await collectionRepository.findCollection(
+            nft[0].collectionId
+          );
+          if (
+            collection &&
+            new Date().toISOString().split(".")[0] + "Z" >=
+              collection["reveal-at"]
+          ) {
+            console.log(
+              "calling reveal for token with content hash: ",
+              obj["content-hash"]
+            );
+            const txResponse = await revealNft(collection, nft[0]);
+            let requestKeys: string[] = new Array();
+            if (txResponse == null) {
+              console.log(
+                "error occurred while calling reveal for token: ",
+                obj["content-hash"]
+              );
+            } else {
+              console.log(txResponse["requestKeys"]);
+              requestKeys = requestKeys.concat(txResponse["requestKeys"]);
+            }
+            for (const requestKey of requestKeys) {
+              const listenTxResponse = await listenTx(requestKey);
+              if (
+                listenTxResponse &&
+                listenTxResponse.result &&
+                listenTxResponse.response.data
+              ) {
+                nftRepository.updateRevealedAt(
+                  nft[0].id,
+                  listenTxResponse.metaData.blockHeight
+                );
+              }
+            }
+          }
+        }
       }
     })
   );
+};
+
+export const checkRevealTime = async () => {
+  const collections =
+    (await collectionRepository.findCollectionLessThanReveal(
+      new Date().toString()
+    )) || [];
+  for (const collection of collections) {
+    const nfts =
+      (await nftRepository.findNFTByCollectionIdAndNullReveal(collection.id)) ||
+      [];
+    for (const nft of nfts) {
+      if (nft.mintedAt) {
+        const txResponse = await revealNft(collection, nft);
+        let requestKeys: string[] = new Array();
+        if (txResponse == null) {
+          console.log(
+            "error occurred while calling reveal for token: ",
+            nft.hash
+          );
+        } else {
+          console.log(txResponse["requestKeys"]);
+          requestKeys = requestKeys.concat(txResponse["requestKeys"]);
+        }
+        for (const requestKey of requestKeys) {
+          const listenTxResponse = await listenTx(requestKey);
+          if (
+            listenTxResponse &&
+            listenTxResponse.result &&
+            listenTxResponse.response.data
+          ) {
+            const updatedNft = await nftRepository.updateRevealedAt(
+              nft.id,
+              listenTxResponse.metaData.blockHeight
+            );
+          }
+        }
+      }
+    }
+  }
 };

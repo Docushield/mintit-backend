@@ -44,6 +44,9 @@ export class Collection extends Model {
   @Column(DataType.DATE)
   "premint-ends": string;
 
+  @Column(DataType.DATE)
+  "reveal-at": string;
+
   @Column(DataType.ARRAY(DataType.STRING))
   "premint-whitelist": [string];
 
@@ -95,4 +98,5 @@ export type Token = {
   spec: object;
   hash: string;
   content_uri: { scheme: string; data: string };
+  index: number;
 };

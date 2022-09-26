@@ -50,8 +50,10 @@ export class NFT extends Model {
   hash: string;
 
   @Column(DataType.JSONB)
-  contentUri: object;
+  contentUri: ContentUri;
 
   @Column
   index: number;
 }
+
+type ContentUri = { scheme: string; data: string };
