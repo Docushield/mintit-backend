@@ -130,7 +130,7 @@ export class NFTRepository {
     return data;
   }
 
-  async updateRevealedAt(id: string, revealedAt: string) {
+  async updateRevealedAt(id: string, revealedAt: number) {
     let data = {};
     try {
       data = await this.nftRepository.update(

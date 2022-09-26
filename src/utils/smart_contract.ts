@@ -149,7 +149,7 @@ export const checkMintTokenOnChain = async () => {
               ) {
                 nftRepository.updateRevealedAt(
                   nft[0].id,
-                  new Date().toISOString().split(".")[0] + "Z"
+                  listenTxResponse.metaData.blockHeight
                 );
               }
             }
@@ -190,7 +190,7 @@ export const checkRevealTime = async () => {
         ) {
           const updatedNft = await nftRepository.updateRevealedAt(
             nft.id,
-            new Date().toString()
+            listenTxResponse.metaData.blockHeight
           );
         }
       }

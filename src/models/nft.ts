@@ -42,7 +42,7 @@ export class NFT extends Model {
   mintedAt: number;
 
   @Column
-  revealedAt: string;
+  revealedAt: number;
 
   @Unique
   @AllowNull(false)
