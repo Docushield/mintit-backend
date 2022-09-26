@@ -170,28 +170,30 @@ export const checkRevealTime = async () => {
       (await nftRepository.findNFTByCollectionIdAndNullReveal(collection.id)) ||
       [];
     for (const nft of nfts) {
-      const txResponse = await revealNft(collection, nft);
-      let requestKeys: string[] = new Array();
-      if (txResponse == null) {
-        console.log(
-          "error occurred while calling reveal for token: ",
-          nft.hash
-        );
-      } else {
-        console.log(txResponse["requestKeys"]);
-        requestKeys = requestKeys.concat(txResponse["requestKeys"]);
-      }
-      for (const requestKey of requestKeys) {
-        const listenTxResponse = await listenTx(requestKey);
-        if (
-          listenTxResponse &&
-          listenTxResponse.result &&
-          listenTxResponse.response.data
-        ) {
-          const updatedNft = await nftRepository.updateRevealedAt(
-            nft.id,
-            listenTxResponse.metaData.blockHeight
+      if (nft.mintedAt) {
+        const txResponse = await revealNft(collection, nft);
+        let requestKeys: string[] = new Array();
+        if (txResponse == null) {
+          console.log(
+            "error occurred while calling reveal for token: ",
+            nft.hash
           );
+        } else {
+          console.log(txResponse["requestKeys"]);
+          requestKeys = requestKeys.concat(txResponse["requestKeys"]);
+        }
+        for (const requestKey of requestKeys) {
+          const listenTxResponse = await listenTx(requestKey);
+          if (
+            listenTxResponse &&
+            listenTxResponse.result &&
+            listenTxResponse.response.data
+          ) {
+            const updatedNft = await nftRepository.updateRevealedAt(
+              nft.id,
+              listenTxResponse.metaData.blockHeight
+            );
+          }
         }
       }
     }
