@@ -6,7 +6,7 @@ import { loginRouter, collectionRouter } from "./routes";
 import multer from "multer";
 import Pact from "pact-lang-api";
 import * as Kadena from "./utils/kadena";
-import { checkMintTokenOnChain } from "./utils/smart_contract"
+import { checkMintTokenOnChain } from "./utils/smart_contract";
 
 const app = express();
 const PORT: Number = 8080;
