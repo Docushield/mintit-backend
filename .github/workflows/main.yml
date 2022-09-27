@@ -6,9 +6,10 @@ env:
   FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 jobs:
   deploy:
-      name: Deploy the-backend
+      name: Deploy the-backend on Dev and Staging
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
         - uses: superfly/flyctl-actions/setup-flyctl@master
-        - run: flyctl deploy --remote-only
+        - run: flyctl deploy -a the-backend --remote-only
+        - run: flyctl deploy -a staging-mintit-backend --remote-only
