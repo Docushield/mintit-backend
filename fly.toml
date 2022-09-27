@@ -1,6 +1,6 @@
 # fly.toml file generated for the-backend on 2022-09-06T07:01:24+05:00
 
-app = "the-backend"
+#app = "the-backend"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
