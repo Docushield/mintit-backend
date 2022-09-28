@@ -46,7 +46,7 @@ export class CollectionController {
     return;
   }
 
-  async getCollectionByHash(req: Request, res: Response) {
+  async getCollections(req: Request, res: Response) {
     const tokenU = req.headers["x-auth-token"];
     const isAuthenticated = await this.authTokenRespository.validateToken(
       tokenU,
@@ -68,7 +68,17 @@ export class CollectionController {
       res.status(200).json(nft);
       return;
     }
-    res.status(400).json({ error: "hash in query param is not string" });
+    await this.getAllCollections(req, res);
+    return;
+  }
+
+  async getAllCollections(req: Request, res: Response) {
+    const nfts = (await this.collectionRepository.findAllCollections()) || [];
+    nfts.map(function (nft) {
+      nft["imageUrl"] = s3.buildUrl(nft["imageUrl"]);
+      nft["bannerImageUrl"] = s3.buildUrl(nft["bannerImageUrl"]);
+    });
+    res.status(200).json(nfts);
     return;
   }
 

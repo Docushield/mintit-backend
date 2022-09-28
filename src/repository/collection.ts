@@ -195,4 +195,14 @@ export class CollectionRepository {
     }
     return data;
   }
+
+  async findAllCollections() {
+    let data: [Collection] | null = null;
+    try {
+      data = await this.collectionsRespository.findAll({});
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
 }
