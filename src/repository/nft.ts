@@ -32,7 +32,7 @@ export class NFTRepository {
       nft["status"] = "PENDING";
       return await this.nftRepository.create(nft);
     } catch (err) {
-      this.logger.error("Error::" + err);
+      this.logger.error("errors occurred while inserting nft:" + err.errors);
       res
         .status(500)
         .json({ error: "error occurred while creating nft collection: ", err });
