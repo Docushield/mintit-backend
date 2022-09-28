@@ -50,7 +50,7 @@ router.get("/:slug", (req: Request, res: Response) => {
 });
 
 router.get("/", (req: Request, res: Response) => {
-  collectionController.getCollectionByHash(req, res);
+  collectionController.getCollections(req, res);
 });
 
 router.get("/:slug/tokens", (req: Request, res: Response) => {
