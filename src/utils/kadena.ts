@@ -25,9 +25,9 @@ export const sendTx = async (expression: string, envData = {}, caps = []) => {
     senderAccount,
     chainId,
     gasPrice,
-    5000,
+    gasLimit,
     Math.floor(new Date().getTime() / 1000),
-    60
+    3600
   );
   let cmd = [
     {
