@@ -3,7 +3,7 @@ import { APILogger } from "../logger/api";
 import { NFT } from "../models/nft";
 import { v4 as uuidv4 } from "uuid";
 import { Response } from "express";
-import { Sequelize } from "sequelize";
+import { Sequelize, Op } from "sequelize";
 
 export class NFTRepository {
   private logger: APILogger;
@@ -32,7 +32,9 @@ export class NFTRepository {
       nft["status"] = "PENDING";
       return await this.nftRepository.create(nft);
     } catch (err) {
-      this.logger.error("errors occurred while inserting nft:" + JSON.stringify(err.errors));
+      this.logger.error(
+        "errors occurred while inserting nft:" + JSON.stringify(err.errors)
+      );
       res
         .status(500)
         .json({ error: "error occurred while creating nft collection: ", err });
@@ -105,6 +107,9 @@ export class NFTRepository {
       data = await this.nftRepository.findAll({
         where: {
           collectionId: id,
+          mintedAt: {
+            [Op.ne]: null,
+          },
         },
       });
     } catch (err) {
