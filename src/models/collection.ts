@@ -85,6 +85,9 @@ export class Collection extends Model {
   @AllowNull(false)
   @Column
   slug: string;
+
+  @Column
+  numMinted: number;
 }
 
 type MintRoyalties = {

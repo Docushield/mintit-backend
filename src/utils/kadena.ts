@@ -51,6 +51,33 @@ export const sendTx = async (expression: string, envData = {}, caps = []) => {
   }
 };
 
+export const localTx = async (expression: string, envData = {}, caps = []) => {
+  let metaInfo = Pact.lang.mkMeta(
+    senderAccount,
+    chainId,
+    gasPrice,
+    gasLimit,
+    Math.floor(new Date().getTime() / 1000),
+    3600
+  );
+  let cmd = {
+    pactCode: expression,
+    meta: metaInfo,
+    networkId: networkId,
+    envData: envData,
+  };
+  console.log(JSON.stringify(cmd));
+
+  try {
+    let resp = await Pact.fetch.local(cmd, apiEndpoint);
+    console.log("response recieved from local tx: ", resp);
+    return resp;
+  } catch (e) {
+    console.log("Error occurred while sending local tx: ", e);
+    return null;
+  }
+};
+
 export const listenTx = async (requestKey: string) => {
   let cmd = { listen: requestKey };
   console.log(cmd);
@@ -89,6 +116,12 @@ const apiPost = async (route, payload) =>
 
 export const send = async (payload) =>
   await (await apiPost("send", payload)).json();
+
+export const local = async (payload) => {
+  const resp = await await apiPost("local", payload);
+  console.log(resp);
+  return resp;
+};
 
 const mkGuard = (publicKey) => {
   return {

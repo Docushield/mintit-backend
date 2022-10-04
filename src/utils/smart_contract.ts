@@ -1,6 +1,7 @@
 import { Collection, Token } from "../models/collection";
 import {
   send,
+  localTx,
   mkCap,
   mkCmd,
   chainId,
@@ -154,6 +155,13 @@ export const checkMintTokenOnChain = async () => {
               }
             }
           }
+          if (collection) {
+            const numMinted = await getCollection(collection.name);
+            await collectionRepository.updateNumMinted(
+              collection.id,
+              numMinted
+            );
+          }
         }
       }
     })
@@ -198,4 +206,13 @@ export const checkRevealTime = async () => {
       }
     }
   }
+};
+
+export const getCollection = async (collectionName: string) => {
+  const pactCode = `(${contractNamespace}.${contractName}.get-nft-collection "${collectionName}")`;
+
+  console.log(pactCode);
+  const resp = await localTx(pactCode);
+  console.log("Response from local: ", resp.result.data["num-minted"].int);
+  return resp.result.data["num-minted"].int;
 };
