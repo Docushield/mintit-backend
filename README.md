@@ -1,6 +1,5 @@
 # mintit-backend
 Express/NodeJS backend for MintIt Platform implemented in typescript.
-:Fly.io test:
 
 #### Setup:
 - Install node version v16.
