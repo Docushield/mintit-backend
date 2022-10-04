@@ -71,6 +71,7 @@ export class CollectionRepository {
       collection["status"] = "pending";
       collection["imageUrl"] = imageUrl;
       collection["bannerImageUrl"] = bannerImageUrl;
+      collection["numMinted"] = 0;
       return await this.collectionsRespository.create(collection);
     } catch (err) {
       this.logger.error("Error::" + err);
@@ -202,6 +203,25 @@ export class CollectionRepository {
       data = await this.collectionsRespository.findAll({});
     } catch (err) {
       this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+
+  async updateNumMinted(id: string, numMinted: number) {
+    let data = {};
+    try {
+      data = await this.collectionsRespository.update(
+        { numMinted: numMinted },
+        {
+          where: {
+            id: id,
+          },
+        }
+      );
+    } catch (err) {
+      this.logger.error(
+        "error occurred while updating num minted: " + err.errors
+      );
     }
     return data;
   }
