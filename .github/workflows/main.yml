@@ -1,29 +1,15 @@
-name: Fly Deploy
+name: Fly Deploy Development
 on:
   push:
-    branches:
-      - main
-      - staging
+    branches: [ main ]
 env:
   FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 jobs:
-  deploy-dev:
+  deploy:
       name: Deploy the-backend on Development
       runs-on: ubuntu-latest
-      if: ${{ github.ref == 'refs/heads/main' }}
       steps:
-        - name: Deploy Testing/Dev
         - uses: actions/checkout@v2
         - uses: superfly/flyctl-actions/setup-flyctl@master
         - run: flyctl deploy -a the-backend --remote-only
-        
-        
-  deploy-staging:
-      name: Deploy the-backend on Staging
-      runs-on: ubuntu-latest
-      if: ${{ github.ref == 'refs/heads/staging' }}
-      steps:
-        - name: Deploy Staging
-        - uses: actions/checkout@v2
-        - uses: superfly/flyctl-actions/setup-flyctl@master
-        - run: flyctl deploy -a staging-mintit-backend --remote-only
+        #- run: flyctl deploy -a staging-mintit-backend --remote-only
