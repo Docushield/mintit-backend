@@ -12,13 +12,11 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v2
-
         - name: Deploy Testing/Dev
-          if: github.ref == 'refs/heads/main'
+          if: ${{ github.ref == 'refs/heads/main' }}
           uses: superfly/flyctl-actions/setup-flyctl@master
           run: flyctl deploy -a the-backend --remote-only
-
         - name: Deploy Staging
-          if: github.ref == 'refs/heads/staging'
+          if: ${{ github.ref == 'refs/heads/staging' }}
           uses: superfly/flyctl-actions/setup-flyctl@master
           run: flyctl deploy -a staging-mintit-backend --remote-only
