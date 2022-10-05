@@ -28,14 +28,6 @@ export class CollectionController {
   }
 
   async getCollectionStatus(req: Request, res: Response) {
-    const tokenU = req.headers["x-auth-token"];
-    const isAuthenticated = await this.authTokenRespository.validateToken(
-      tokenU,
-      res
-    );
-    if (!isAuthenticated) {
-      return;
-    }
     const id = req.params["id"];
     const nft = await this.collectionRepository.findCollection(id);
     if (!nft) {
@@ -47,14 +39,6 @@ export class CollectionController {
   }
 
   async getCollections(req: Request, res: Response) {
-    const tokenU = req.headers["x-auth-token"];
-    const isAuthenticated = await this.authTokenRespository.validateToken(
-      tokenU,
-      res
-    );
-    if (!isAuthenticated) {
-      return;
-    }
     const hash = req.query["hash"];
     if (typeof hash == "string") {
       const nft =
@@ -83,14 +67,6 @@ export class CollectionController {
   }
 
   async getCollection(req: Request, res: Response) {
-    const tokenU = req.headers["x-auth-token"];
-    const isAuthenticated = await this.authTokenRespository.validateToken(
-      tokenU,
-      res
-    );
-    if (!isAuthenticated) {
-      return;
-    }
     const id = req.params["slug"];
     const nft = await this.collectionRepository.findCollectionBySlug(id);
     if (!nft) {
@@ -104,14 +80,6 @@ export class CollectionController {
   }
 
   async getNFTTokens(req: Request, res: Response) {
-    const tokenU = req.headers["x-auth-token"];
-    const isAuthenticated = await this.authTokenRespository.validateToken(
-      tokenU,
-      res
-    );
-    if (!isAuthenticated) {
-      return;
-    }
     const id = req.params["slug"];
     const nft = await this.collectionRepository.findCollectionBySlug(id);
     if (!nft) {
