@@ -57,7 +57,7 @@ export class Collection extends Model {
   "mint-price": number;
 
   @Column(DataType.ARRAY(DataType.JSONB))
-  "token-list": [Token];
+  "token-list": Token[];
 
   @CreatedAt
   @Column
@@ -85,6 +85,9 @@ export class Collection extends Model {
   @AllowNull(false)
   @Column
   slug: string;
+
+  @Column
+  numMinted: number;
 }
 
 type MintRoyalties = {

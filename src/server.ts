@@ -7,6 +7,7 @@ import multer from "multer";
 import Pact from "pact-lang-api";
 import * as Kadena from "./utils/kadena";
 import { checkMintTokenOnChain, checkRevealTime } from "./utils/smart_contract";
+import compression = require("compression");
 
 const app = express();
 const PORT: Number = 8080;
@@ -23,6 +24,16 @@ const corsOptions: cors.CorsOptions = {
   origin: allowedOrigins,
 };
 
+const shouldCompress = (req, res) => {
+  if (req.headers["x-no-compression"]) {
+    // Will not compress responses, if this header is present
+    return false;
+  }
+  // Resort to standard compression
+  return compression.filter(req, res);
+};
+
+app.use(compression({ filter: shouldCompress }));
 app.options("*", cors());
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
