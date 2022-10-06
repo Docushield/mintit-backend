@@ -75,3 +75,12 @@ export const customStringify = (obj: [object]) => {
 
   return `[` + removeComma(arrStr) + `]`;
 };
+
+export const sliceIntoChunks = (arr: any[], chunkSize: number) => {
+  let res: any[] = [];
+  for (let i = 0; i < arr.length; i += chunkSize) {
+    let chunk = arr.slice(i, i + chunkSize);
+    res.push(chunk);
+  }
+  return res;
+};
