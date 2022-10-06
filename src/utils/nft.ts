@@ -1,6 +1,7 @@
 import { Collection, Token } from "../models/collection";
 import { TypedRequestBody } from "../express";
 import { objCustomStringify } from "./serialize";
+import { contractName, contractNamespace } from "./smart_contract";
 
 export const initNFTExpression = (
   body: {
@@ -10,13 +11,13 @@ export const initNFTExpression = (
   },
   collection: Collection
 ) => {
-  let tokenListHashes = body["token-list"].map((val) => {
+  let tokenListHashes = collection["token-list"].map((val) => {
     return val.hash;
   });
   const mintRoyaltyData = buildGuards(collection["mint-royalties"]["rates"]);
   const saleRoyaltyData = buildGuards(collection["sale-royalties"]["rates"]);
   const data = { ...mintRoyaltyData, ...saleRoyaltyData };
-  let expression = `(free.z74plc.init-nft-collection {"creator": "${
+  let expression = `(${contractNamespace}.${contractName}.init-nft-collection {"creator": "${
     collection.creator
   }", "description": "${collection.description}", "name" : "${
     collection.name
@@ -57,4 +58,11 @@ export const modifyRoyalty = (royalty: [{ description: string }]) => {
     e["stakeholder-guard"] = `(read-msg ${e.description}-guard)`;
   });
   return royalty;
+};
+
+export const addNFTTokens = (name: string, tokens: [Token]) => {
+  let tokenListHashes = tokens.map((val) => {
+    return val.hash;
+  });
+  return `(${contractNamespace}.${contractName}.add-nft-tokens "${name}" ${tokenListHashes})`;
 };

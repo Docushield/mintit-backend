@@ -24,7 +24,7 @@ export class NFTRepository {
       hash: string;
       contentUri: object;
     },
-    res: Response
+    res: Response | null
   ) {
     try {
       nft["createdAt"] = new Date().toISOString();
@@ -35,9 +35,13 @@ export class NFTRepository {
       this.logger.error(
         "errors occurred while inserting nft:" + JSON.stringify(err.errors)
       );
-      res
-        .status(500)
-        .json({ error: "error occurred while creating nft collection: ", err });
+      if (res)
+        res
+          .status(500)
+          .json({
+            error: "error occurred while creating nft collection: ",
+            err,
+          });
       return;
     }
   }

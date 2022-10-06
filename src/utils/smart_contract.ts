@@ -13,8 +13,8 @@ import { NFTRepository } from "../repository/nft";
 import { CollectionRepository } from "../repository/collection";
 import Pact from "pact-lang-api";
 
-const contractNamespace = process.env.CONTRACT_NAMESPACE || "free";
-const contractName = process.env.CONTRACT_NAME || "z74plc";
+export const contractNamespace = process.env.CONTRACT_NAMESPACE || "free";
+export const contractName = process.env.CONTRACT_NAME || "z74plc";
 
 const mintTrackingBatchSize =
   parseInt(process.env.MINT_TRACKING_BATCH_SIZE || "10") || 10;
