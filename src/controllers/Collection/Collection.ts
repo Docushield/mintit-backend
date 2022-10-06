@@ -49,6 +49,7 @@ export class CollectionController {
       }
       nft["imageUrl"] = s3.buildUrl(nft["imageUrl"]);
       nft["bannerImageUrl"] = s3.buildUrl(nft["bannerImageUrl"]);
+      nft["token-list"] = [];
       res.status(200).json(nft);
       return;
     }
@@ -61,6 +62,7 @@ export class CollectionController {
     nfts.map(function (nft) {
       nft["imageUrl"] = s3.buildUrl(nft["imageUrl"]);
       nft["bannerImageUrl"] = s3.buildUrl(nft["bannerImageUrl"]);
+      nft["token-list"] = [];
     });
     res.status(200).json(nfts);
     return;
@@ -75,6 +77,7 @@ export class CollectionController {
     }
     nft["imageUrl"] = s3.buildUrl(nft["imageUrl"]);
     nft["bannerImageUrl"] = s3.buildUrl(nft["bannerImageUrl"]);
+    nft["token-list"] = [];
     res.status(200).json(nft);
     return;
   }
