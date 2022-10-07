@@ -20,6 +20,8 @@
   },
   "homepage": "https://github.com/docushield/mintit-backend#readme",
   "dependencies": {
+    "@appsignal/express": "^1.0.33",
+    "@appsignal/nodejs": "^2.4.2",
     "@types/compression": "^1.7.2",
     "@types/multer": "^1.4.7",
     "@types/pg": "^8.6.5",
