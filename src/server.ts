@@ -17,7 +17,10 @@ import Pact from "pact-lang-api";
 import * as Kadena from "./utils/kadena";
 import { checkMintTokenOnChain, checkRevealTime } from "./utils/smart_contract";
 import compression = require("compression");
-const { expressMiddleware, expressErrorHandler } = require("@appsignal/express");
+const {
+  expressMiddleware,
+  expressErrorHandler,
+} = require("@appsignal/express");
 
 const app = express();
 const PORT: Number = 8080;
@@ -49,11 +52,9 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(expressMiddleware(appsignal));
-app.use(expressErrorHandler(appsignal));
 
 app.use("/api/auth", loginRouter);
 app.use("/api/collections", collectionRouter);
-
 
 // Handling GET / Request
 app.get("/", (req, res) => {
@@ -61,10 +62,9 @@ app.get("/", (req, res) => {
 });
 
 app.get("/throw", (req, res) => {
-  throw new Error('Throw makes it go boom!')
-  res.send("Welcome to typescript backend!");
+  res.status(500).send("Welcome to typescript backend!");
 });
-
+app.use(expressErrorHandler(appsignal));
 
 // Server setup
 app.listen(PORT, () => {
