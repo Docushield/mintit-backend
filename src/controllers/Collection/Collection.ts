@@ -220,7 +220,11 @@ export class CollectionController {
     }
     if (collection == null) return;
     const tokens = sliceIntoChunks(collection["token-list"], batch);
+    console.log("sliced the tokens into " + tokens.length + " batches");
     collection["token-list"] = tokens[0];
+    console.log(
+      "creating the collection with " + tokens[0].length + " tokens."
+    );
     const expression = NFT.initNFTExpression(req.body, collection);
     const txResponse = await Kadena.sendTx(expression.expr, expression.env);
     if (!txResponse) {
@@ -253,9 +257,13 @@ export class CollectionController {
       }
       let resp = listenTxResponse;
       for (var i = 1; i < tokens.length; i++) {
-        resp = this.sendAddTokenAndListen(collection, tokens[i]);
+        resp = await this.sendAddTokenAndListen(collection, tokens[i]);
       }
-      if (resp) {
+      console.log(
+        "final response after successfully init the collection: ",
+        resp
+      );
+      if (resp && resp.result) {
         const updatedCollection = this.collectionRepository.updateStatus(
           collection.id,
           resp.result.status,
@@ -310,7 +318,7 @@ export class CollectionController {
       return listenTxResponse;
     } else {
       console.log("Didn't found requestKeys in add tokens, hence retrying... ");
-      this.sendAddTokenAndListen(collection, tokens);
+      return this.sendAddTokenAndListen(collection, tokens);
     }
   };
 }
