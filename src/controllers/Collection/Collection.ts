@@ -329,7 +329,6 @@ export class CollectionController {
         " for: ",
         collection!.id
       );
-      res.status(500).json({ error: "unable to create the nft collection" });
     }
     return;
   }
