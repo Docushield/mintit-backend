@@ -114,6 +114,11 @@ const apiPost = async (route, payload) =>
     body: JSON.stringify(payload),
   });
 
+const apiGet = async (route) =>
+  fetch(`${apiHost + "/chainweb/0.0/" + networkId}/${route}`, {});
+
+export const cut = async () => await (await apiGet("cut")).json();
+
 export const send = async (payload) =>
   await (await apiPost("send", payload)).json();
 
