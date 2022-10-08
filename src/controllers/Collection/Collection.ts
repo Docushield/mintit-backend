@@ -249,13 +249,24 @@ export class CollectionController {
       // This will be happening async and try to init collection and update status
       // based on the response.rom blockchain
       const listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
-      if (!listenTxResponse) {
-        res.status(500).json({
-          error: "error while listening on transaction to blockchain",
-        });
+      let resp = listenTxResponse;
+      if (listenTxResponse.result.error) {
+        const updatedCollection = this.collectionRepository.updateStatus(
+          collection.id,
+          resp.result.status,
+          resp.result.error ? resp.result.error.message : "true",
+          res
+        );
+        if (!updatedCollection) return;
+
+        console.log(
+          "Updated the status to: ",
+          listenTxResponse.result.status,
+          " for: ",
+          collection!.id
+        );
         return;
       }
-      let resp = listenTxResponse;
       for (var i = 1; i < tokens.length; i++) {
         resp = await this.sendAddTokenAndListen(collection, tokens[i]);
       }
