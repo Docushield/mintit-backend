@@ -1,3 +1,12 @@
+//app-signal
+const { Appsignal } = require("@appsignal/nodejs");
+
+const appsignal = new Appsignal({
+  active: true,
+  name: "tnm-docs",
+  pushApiKey: "97fcea79-cd4f-4ec3-88d9-b387ec410662",
+});
+
 // Importing module
 import express from "express";
 import cors from "cors";
@@ -8,6 +17,10 @@ import Pact from "pact-lang-api";
 import * as Kadena from "./utils/kadena";
 import { checkMintTokenOnChain, checkRevealTime } from "./utils/smart_contract";
 import compression = require("compression");
+const {
+  expressMiddleware,
+  expressErrorHandler,
+} = require("@appsignal/express");
 
 const app = express();
 const PORT: Number = 8080;
@@ -38,6 +51,7 @@ app.options("*", cors());
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
+app.use(expressMiddleware(appsignal));
 
 app.use("/api/auth", loginRouter);
 app.use("/api/collections", collectionRouter);
@@ -46,6 +60,11 @@ app.use("/api/collections", collectionRouter);
 app.get("/", (req, res) => {
   res.send("Welcome to typescript backend!");
 });
+
+app.get("/throw", (req, res) => {
+  res.status(500).send("Welcome to typescript backend!");
+});
+app.use(expressErrorHandler(appsignal));
 
 // Server setup
 app.listen(PORT, () => {
