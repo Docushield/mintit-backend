@@ -190,12 +190,34 @@ export class CollectionController {
     }
     console.log("Response for uploading collection banner image: ", bannerResp);
     console.log("Response for uploading collection image: ", resp);
-    const collection = await this.collectionRepository.createCollection(
-      req.body,
-      resp,
-      bannerResp,
-      res
-    );
+    const existingCollection =
+      await this.collectionRepository.findCollectionBySlug(req.body.slug);
+    let collection;
+    if (existingCollection) {
+      if (existingCollection.status === "failure") {
+        const collectionE =
+          await this.collectionRepository.updateWholeCollection(
+            req.body,
+            resp,
+            bannerResp,
+            existingCollection.id,
+            res
+          );
+        collection = collectionE[1][0];
+      } else {
+        res
+          .status(400)
+          .json({ error: "collection already exists with same slug" });
+        return;
+      }
+    } else {
+      collection = await this.collectionRepository.createCollection(
+        req.body,
+        resp,
+        bannerResp,
+        res
+      );
+    }
     if (collection == null) return;
     const tokens = sliceIntoChunks(collection["token-list"], batch);
     collection["token-list"] = tokens[0];
@@ -254,6 +276,20 @@ export class CollectionController {
 
       return;
     } else {
+      const updatedCollection = this.collectionRepository.updateStatus(
+        collection.id,
+        "failure",
+        "not able to connect to chain",
+        res
+      );
+      if (!updatedCollection) return;
+
+      console.log(
+        "Updated the status to: ",
+        "failure",
+        " for: ",
+        collection!.id
+      );
       res.status(500).json({ error: "unable to create the nft collection" });
     }
     return;

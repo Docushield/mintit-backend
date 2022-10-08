@@ -36,12 +36,10 @@ export class NFTRepository {
         "errors occurred while inserting nft:" + JSON.stringify(err.errors)
       );
       if (res)
-        res
-          .status(500)
-          .json({
-            error: "error occurred while creating nft collection: ",
-            err,
-          });
+        res.status(500).json({
+          error: "error occurred while creating nft collection: ",
+          err,
+        });
       return;
     }
   }
@@ -78,6 +76,7 @@ export class NFTRepository {
           where: {
             id: id,
           },
+          returning: true,
         }
       );
     } catch (err) {
@@ -148,6 +147,7 @@ export class NFTRepository {
           where: {
             id: id,
           },
+          returning: true,
         }
       );
     } catch (err) {

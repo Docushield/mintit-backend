@@ -83,6 +83,7 @@ export class AuthTokenRepository {
           where: {
             token: authToken,
           },
+          returning: true,
         }
       );
     } catch (err) {
