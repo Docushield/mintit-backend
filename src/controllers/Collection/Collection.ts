@@ -97,6 +97,24 @@ export class CollectionController {
     return;
   }
 
+  async getNFTTokenByHash(req: Request, res: Response) {
+    const id = req.params["slug"];
+    const hash = req.params["hash"];
+    const nft = await this.collectionRepository.findCollectionBySlug(id);
+    if (!nft) {
+      res.status(400).json({ error: "No Collection found." });
+      return;
+    }
+    const nftTokens = await this.nftRepository.findNFTByCollectionId(nft.id);
+    const token = nftTokens?.find((token) => token.hash === hash);
+    if (!token) {
+      res.status(400).json({ error: "No token found." });
+      return;
+    }
+    res.status(200).json(token);
+    return;
+  }
+
   async revealNFT(req: Request, res: Response) {
     const tokenU = req.headers["x-auth-token"];
     const isAuthenticated = await this.authTokenRespository.validateToken(

@@ -56,3 +56,7 @@ router.get("/", (req: Request, res: Response) => {
 router.get("/:slug/tokens", (req: Request, res: Response) => {
   collectionController.getNFTTokens(req, res);
 });
+
+router.get("/:slug/tokens/:hash", (req: Request, res: Response) => {
+  collectionController.getNFTTokenByHash(req, res);
+});
