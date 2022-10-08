@@ -64,5 +64,7 @@ export const addNFTTokens = (name: string, tokens: [Token]) => {
   let tokenListHashes = tokens.map((val) => {
     return val.hash;
   });
-  return `(${contractNamespace}.${contractName}.add-nft-tokens "${name}" ${tokenListHashes})`;
+  return `(${contractNamespace}.${contractName}.add-nft-tokens "${name}" ${JSON.stringify(
+    tokenListHashes
+  )})`;
 };

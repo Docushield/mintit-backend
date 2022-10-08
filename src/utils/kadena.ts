@@ -16,8 +16,8 @@ export const apiHost =
   process.env.API_HOST || "https://api.testnet.chainweb.com";
 export const networkId = process.env.NETWORK_ID || "testnet04";
 export const chainId = process.env.CHAIN_ID || "1";
-const gasPrice = process.env.GAS_PRICE || 0.00000001;
-const gasLimit = process.env.GAS_LIMIT || 100000;
+const gasPrice = parseInt(process.env.GAS_PRICE || "0.00000001") || 0.00000001;
+const gasLimit = parseInt(process.env.GAS_LIMIT || "100000") || 100000;
 export const apiEndpoint =
   apiHost + "/chainweb/0.0/" + networkId + "/chain/" + chainId + "/pact";
 export const sendTx = async (expression: string, envData = {}, caps = []) => {
