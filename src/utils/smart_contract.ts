@@ -131,6 +131,7 @@ export const checkMintTokenOnChain = async () => {
             const collection = await collectionRepository.findCollection(
               nft[1][0].collectionId
             );
+            console.log("collection found: ", collection);
             if (
               collection &&
               new Date().toISOString().split(".")[0] + "Z" >=
@@ -208,12 +209,14 @@ export const checkRevealTime = async () => {
           if (
             listenTxResponse &&
             listenTxResponse.result &&
-            listenTxResponse.response.data
+            listenTxResponse.result.data
           ) {
             const updatedNft = await nftRepository.updateRevealedAt(
               nft.id,
               listenTxResponse.metaData.blockHeight
             );
+          } else {
+            console.log("error occurred while reveal nft: ", listenTxResponse);
           }
         }
       }
