@@ -5,6 +5,24 @@ import { v4 as uuidv4 } from "uuid";
 import { Response } from "express";
 import { Op } from "sequelize";
 
+const restructureFields = (collection: Collection) => {
+  if (typeof collection["mint-royalties"] === "string") {
+    collection["mint-royalties"] = JSON.parse(collection["mint-royalties"]);
+  }
+  if (typeof collection["sale-royalties"] === "string") {
+    collection["sale-royalties"] = JSON.parse(collection["sale-royalties"]);
+  }
+  if (typeof collection["token-list"] === "string") {
+    collection["token-list"] = JSON.parse(collection["token-list"]);
+  }
+  if (typeof collection["premint-whitelist"] === "string") {
+    collection["premint-whitelist"] = JSON.parse(
+      collection["premint-whitelist"]
+    );
+  }
+  return collection;
+};
+
 export class CollectionRepository {
   private logger: APILogger;
   private db: any = {};
@@ -52,20 +70,7 @@ export class CollectionRepository {
         });
         return;
       }
-      if (typeof collection["mint-royalties"] === "string") {
-        collection["mint-royalties"] = JSON.parse(collection["mint-royalties"]);
-      }
-      if (typeof collection["sale-royalties"] === "string") {
-        collection["sale-royalties"] = JSON.parse(collection["sale-royalties"]);
-      }
-      if (typeof collection["token-list"] === "string") {
-        collection["token-list"] = JSON.parse(collection["token-list"]);
-      }
-      if (typeof collection["premint-whitelist"] === "string") {
-        collection["premint-whitelist"] = JSON.parse(
-          collection["premint-whitelist"]
-        );
-      }
+      collection = restructureFields(collection);
       collection["createdAt"] = new Date().toISOString();
       collection["id"] = uuidv4();
       collection["status"] = "pending";
@@ -237,20 +242,7 @@ export class CollectionRepository {
     res: Response
   ) {
     let data = {};
-    if (typeof collection["mint-royalties"] === "string") {
-      collection["mint-royalties"] = JSON.parse(collection["mint-royalties"]);
-    }
-    if (typeof collection["sale-royalties"] === "string") {
-      collection["sale-royalties"] = JSON.parse(collection["sale-royalties"]);
-    }
-    if (typeof collection["token-list"] === "string") {
-      collection["token-list"] = JSON.parse(collection["token-list"]);
-    }
-    if (typeof collection["premint-whitelist"] === "string") {
-      collection["premint-whitelist"] = JSON.parse(
-        collection["premint-whitelist"]
-      );
-    }
+    collection = restructureFields(collection);
     collection["status"] = "pending";
     collection["imageUrl"] = imageUrl;
     collection["bannerImageUrl"] = bannerImageUrl;
