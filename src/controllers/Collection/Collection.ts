@@ -98,15 +98,19 @@ export class CollectionController {
   }
 
   async getNFTTokenByHash(req: Request, res: Response) {
-    const id = req.params["slug"];
+    const slug = req.params["slug"];
     const hash = req.params["hash"];
-    const nft = await this.collectionRepository.findCollectionBySlug(id);
-    if (!nft) {
+    const collection = await this.collectionRepository.findCollectionBySlug(
+      slug
+    );
+    if (!collection) {
       res.status(400).json({ error: "No Collection found." });
       return;
     }
-    const nftTokens = await this.nftRepository.findNFTByCollectionId(nft.id);
-    const token = nftTokens?.find((token) => token.hash === hash);
+    const token = await this.nftRepository.findNFTByCollectionIdAndHash(
+      collection.id,
+      hash
+    );
     if (!token) {
       res.status(400).json({ error: "No token found." });
       return;
