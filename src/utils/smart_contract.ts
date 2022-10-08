@@ -129,7 +129,7 @@ export const checkMintTokenOnChain = async () => {
               p.height
             );
             const collection = await collectionRepository.findCollection(
-              nft[1].collectionId
+              nft[1][0].collectionId
             );
             if (
               collection &&
@@ -140,7 +140,7 @@ export const checkMintTokenOnChain = async () => {
                 "calling reveal for token with content hash: ",
                 obj["content-hash"]
               );
-              const txResponse = await revealNft(collection, nft[1]);
+              const txResponse = await revealNft(collection, nft[1][0]);
               let requestKeys: string[] = new Array();
               if (txResponse == null) {
                 console.log(
@@ -159,7 +159,7 @@ export const checkMintTokenOnChain = async () => {
                   listenTxResponse.response.data
                 ) {
                   nftRepository.updateRevealedAt(
-                    nft[1].id,
+                    nft[1][0].id,
                     listenTxResponse.metaData.blockHeight
                   );
                 }
