@@ -119,12 +119,7 @@ export class CollectionRepository {
     return data;
   }
 
-  async updateStatus(
-    id: string,
-    status: string,
-    statusMessage: string,
-    res: Response
-  ) {
+  async updateStatus(id: string, status: string, statusMessage: string) {
     let data = {};
     try {
       data = await this.collectionsRespository.update(
@@ -137,11 +132,9 @@ export class CollectionRepository {
         }
       );
     } catch (err) {
-      this.logger.error("Error::" + err);
-      res.status(500).json({
-        error: "error occurred while updating collection status: ",
-        err,
-      });
+      this.logger.error(
+        "error occurred while updating status: " + JSON.stringify(err.errors)
+      );
     }
     return data;
   }

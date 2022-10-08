@@ -273,11 +273,10 @@ export class CollectionController {
       const listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
       let resp = listenTxResponse;
       if (listenTxResponse.result.error) {
-        const updatedCollection = this.collectionRepository.updateStatus(
+        const updatedCollection = await this.collectionRepository.updateStatus(
           collection.id,
           resp.result.status,
-          resp.result.error ? resp.result.error.message : "true",
-          res
+          resp.result.error.message
         );
         if (!updatedCollection) return;
 
@@ -297,11 +296,10 @@ export class CollectionController {
         resp
       );
       if (resp && resp.result) {
-        const updatedCollection = this.collectionRepository.updateStatus(
+        const updatedCollection = await this.collectionRepository.updateStatus(
           collection.id,
           resp.result.status,
-          resp.result.error ? resp.result.error.message : resp.result.data,
-          res
+          resp.result.error ? resp.result.error.message : "true"
         );
         if (!updatedCollection) return;
 
@@ -309,17 +307,16 @@ export class CollectionController {
           "Updated the status to: ",
           listenTxResponse.result.status,
           " for: ",
-          collection!.id
+          collection.id
         );
       }
 
       return;
     } else {
-      const updatedCollection = this.collectionRepository.updateStatus(
+      const updatedCollection = await this.collectionRepository.updateStatus(
         collection.id,
         "failure",
-        "not able to connect to chain",
-        res
+        "not able to connect to chain"
       );
       if (!updatedCollection) return;
 
@@ -327,7 +324,7 @@ export class CollectionController {
         "Updated the status to: ",
         "failure",
         " for: ",
-        collection!.id
+        collection.id
       );
     }
     return;
