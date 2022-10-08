@@ -83,14 +83,10 @@ export const checkMintTokenOnChain = async () => {
   const cutResp = await cut();
   let chainBlockHeight = blockFrom + mintTrackingBatchSize;
   if (cutResp.hashes) {
-    Object.values(cutResp.hashes).map((e) => {
-      if (e && typeof e == "object") {
-        chainBlockHeight = Math.min(
-          e["height"] || Number.MAX_SAFE_INTEGER,
-          chainBlockHeight
-        );
-      }
-    });
+    chainBlockHeight = Math.min(
+      cutResp.hashes[`${chainId}`]["height"] || Number.MAX_SAFE_INTEGER,
+      chainBlockHeight
+    );
   }
   const blockTo = chainBlockHeight;
   lastBlockHeight = blockTo;
