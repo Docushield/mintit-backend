@@ -113,6 +113,21 @@ export class NFTRepository {
     return data;
   }
 
+  async findNFTByCollectionIdAndHash(id: string, hash: string) {
+    let data: NFT | null = null;
+    try {
+      data = await this.nftRepository.findOne({
+        where: {
+          collectionId: id,
+          hash: hash,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+
   async findLatestMintAt() {
     let data = 0;
     try {
