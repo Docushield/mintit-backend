@@ -232,16 +232,14 @@ export class CollectionController {
     if (txResponse["requestKeys"]) {
       res.status(200).json({ slug: collection!.slug });
       for (const token of collection["token-list"]) {
-        const nftCollection = await this.nftRepository.createNFT(
-          {
-            collectionId: collection.id,
-            owner: null,
-            spec: token["spec"],
-            hash: token.hash,
-            contentUri: token["content_uri"],
-          },
-          res
-        );
+        const nftCollection = await this.nftRepository.createNFT({
+          collectionId: collection.id,
+          owner: null,
+          spec: token["spec"],
+          hash: token.hash,
+          contentUri: token["content_uri"],
+        });
+        console.log("here: ", nftCollection);
         if (!nftCollection) return;
       }
       // This will be happening async and try to init collection and update status
@@ -300,16 +298,13 @@ export class CollectionController {
     const txResponse = await Kadena.sendTx(expr);
     if (txResponse["requestKeys"]) {
       for (const token of tokens) {
-        const nftCollection = await this.nftRepository.createNFT(
-          {
-            collectionId: collection.id,
-            owner: null,
-            spec: token["spec"],
-            hash: token.hash,
-            contentUri: token["content_uri"],
-          },
-          null
-        );
+        const nftCollection = await this.nftRepository.createNFT({
+          collectionId: collection.id,
+          owner: null,
+          spec: token["spec"],
+          hash: token.hash,
+          contentUri: token["content_uri"],
+        });
       }
       const listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
       return listenTxResponse;

@@ -16,16 +16,13 @@ export class NFTRepository {
     this.logger = new APILogger();
   }
 
-  async createNFT(
-    nft: {
-      collectionId: string;
-      owner: string | null;
-      spec: object;
-      hash: string;
-      contentUri: object;
-    },
-    res: Response | null
-  ) {
+  async createNFT(nft: {
+    collectionId: string;
+    owner: string | null;
+    spec: object;
+    hash: string;
+    contentUri: object;
+  }) {
     try {
       nft["createdAt"] = new Date().toISOString();
       nft["id"] = uuidv4();
@@ -35,11 +32,6 @@ export class NFTRepository {
       this.logger.error(
         "errors occurred while inserting nft:" + JSON.stringify(err.errors)
       );
-      if (res)
-        res.status(500).json({
-          error: "error occurred while creating nft collection: ",
-          err,
-        });
       return;
     }
   }
