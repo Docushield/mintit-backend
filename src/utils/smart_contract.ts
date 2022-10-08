@@ -116,60 +116,64 @@ export const checkMintTokenOnChain = async () => {
         const obj = p.params[0];
         const nft = await nftRepository.updateMintedAtAndIndexWithOwner(
           obj["content-hash"],
-          obj["mint-index"],
+          obj["mint-index"]["int"],
           obj["current-owner"],
           p.height
         );
         if (nft) {
-          console.log(
-            "Updated minted at for nft with hash: ",
-            obj["content-hash"],
-            " with value: ",
-            p.height
-          );
-          const collection = await collectionRepository.findCollection(
-            nft[0].collectionId
-          );
-          if (
-            collection &&
-            new Date().toISOString().split(".")[0] + "Z" >=
-              collection["reveal-at"]
-          ) {
+          if (nft[0] >= 1) {
             console.log(
-              "calling reveal for token with content hash: ",
-              obj["content-hash"]
+              "Updated minted at for nft with hash: ",
+              obj["content-hash"],
+              " with value: ",
+              p.height
             );
-            const txResponse = await revealNft(collection, nft[0]);
-            let requestKeys: string[] = new Array();
-            if (txResponse == null) {
+            const collection = await collectionRepository.findCollection(
+              nft[1].collectionId
+            );
+            if (
+              collection &&
+              new Date().toISOString().split(".")[0] + "Z" >=
+                collection["reveal-at"]
+            ) {
               console.log(
-                "error occurred while calling reveal for token: ",
+                "calling reveal for token with content hash: ",
                 obj["content-hash"]
               );
-            } else {
-              console.log(txResponse["requestKeys"]);
-              requestKeys = requestKeys.concat(txResponse["requestKeys"]);
-            }
-            for (const requestKey of requestKeys) {
-              const listenTxResponse = await listenTx(requestKey);
-              if (
-                listenTxResponse &&
-                listenTxResponse.result &&
-                listenTxResponse.response.data
-              ) {
-                nftRepository.updateRevealedAt(
-                  nft[0].id,
-                  listenTxResponse.metaData.blockHeight
+              const txResponse = await revealNft(collection, nft[1]);
+              let requestKeys: string[] = new Array();
+              if (txResponse == null) {
+                console.log(
+                  "error occurred while calling reveal for token: ",
+                  obj["content-hash"]
                 );
+              } else {
+                console.log(txResponse["requestKeys"]);
+                requestKeys = requestKeys.concat(txResponse["requestKeys"]);
+              }
+              for (const requestKey of requestKeys) {
+                const listenTxResponse = await listenTx(requestKey);
+                if (
+                  listenTxResponse &&
+                  listenTxResponse.result &&
+                  listenTxResponse.response.data
+                ) {
+                  nftRepository.updateRevealedAt(
+                    nft[1].id,
+                    listenTxResponse.metaData.blockHeight
+                  );
+                }
               }
             }
-          }
-          if (collection) {
-            const numMinted = await getCollection(collection.name);
-            await collectionRepository.updateNumMinted(
-              collection.id,
-              numMinted
-            );
+            if (collection) {
+              const numMinted = await getCollection(collection.name);
+              await collectionRepository.updateNumMinted(
+                collection.id,
+                numMinted
+              );
+            }
+          } else {
+            console.log("No token found with the hash: ", obj["content-hash"]);
           }
         }
       }

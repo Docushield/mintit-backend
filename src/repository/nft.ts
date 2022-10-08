@@ -42,9 +42,8 @@ export class NFTRepository {
     owner: string,
     mintedAt: number
   ) {
-    let data: [NFT] | null = null;
     try {
-      data = await this.nftRepository.update(
+      const data = await this.nftRepository.update(
         { mintedAt: mintedAt, index: index, owner: owner },
         {
           where: {
@@ -53,10 +52,11 @@ export class NFTRepository {
           returning: true,
         }
       );
+      return data;
     } catch (err) {
-      this.logger.error("Error::" + err);
+      this.logger.error("Error::" + JSON.stringify(err));
+      return null;
     }
-    return data;
   }
 
   async updateStatus(id: string, status: string, res: Response) {
