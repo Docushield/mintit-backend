@@ -101,6 +101,7 @@ export class CollectionRepository {
           where: {
             slug: slug,
           },
+          returning: true,
         }
       );
     } catch (err) {
@@ -127,6 +128,7 @@ export class CollectionRepository {
           where: {
             id: id,
           },
+          returning: true,
         }
       );
     } catch (err) {
@@ -216,12 +218,57 @@ export class CollectionRepository {
           where: {
             id: id,
           },
+          returning: true,
         }
       );
     } catch (err) {
       this.logger.error(
         "error occurred while updating num minted: " + err.errors
       );
+    }
+    return data;
+  }
+
+  async updateWholeCollection(
+    collection: Collection,
+    imageUrl: string,
+    bannerImageUrl: string,
+    id: string,
+    res: Response
+  ) {
+    let data = {};
+    if (typeof collection["mint-royalties"] === "string") {
+      collection["mint-royalties"] = JSON.parse(collection["mint-royalties"]);
+    }
+    if (typeof collection["sale-royalties"] === "string") {
+      collection["sale-royalties"] = JSON.parse(collection["sale-royalties"]);
+    }
+    if (typeof collection["token-list"] === "string") {
+      collection["token-list"] = JSON.parse(collection["token-list"]);
+    }
+    if (typeof collection["premint-whitelist"] === "string") {
+      collection["premint-whitelist"] = JSON.parse(
+        collection["premint-whitelist"]
+      );
+    }
+    collection["status"] = "pending";
+    collection["imageUrl"] = imageUrl;
+    collection["bannerImageUrl"] = bannerImageUrl;
+    try {
+      data = await this.collectionsRespository.update(collection, {
+        where: {
+          id: id,
+        },
+        returning: true,
+      });
+    } catch (err) {
+      this.logger.error(
+        "error occurred while updating whole collection: " +
+          JSON.stringify(err.errors)
+      );
+      res
+        .status(500)
+        .json({ error: "error occurred while updating collection: ", err });
     }
     return data;
   }
