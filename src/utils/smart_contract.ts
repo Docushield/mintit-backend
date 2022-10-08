@@ -1,5 +1,6 @@
 import { Collection, Token } from "../models/collection";
 import {
+  cut,
   send,
   localTx,
   mkCap,
@@ -79,7 +80,15 @@ export const checkMintTokenOnChain = async () => {
       ? lastBlockHeight
       : Math.min(lastBlockHeight, latestBlockHeight)
   );
-  const blockTo = blockFrom + mintTrackingBatchSize;
+  const cutResp = await cut();
+  let chainBlockHeight = blockFrom + mintTrackingBatchSize;
+  if (cutResp.hashes) {
+    chainBlockHeight = Math.min(
+      cutResp.hashes[`${chainId}`]["height"] || Number.MAX_SAFE_INTEGER,
+      chainBlockHeight
+    );
+  }
+  const blockTo = chainBlockHeight;
   lastBlockHeight = blockTo;
   console.log(
     "started listening on blockchain for latest mint events from: " +
