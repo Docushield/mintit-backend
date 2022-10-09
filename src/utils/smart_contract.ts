@@ -132,6 +132,13 @@ export const checkMintTokenOnChain = async () => {
               nft[1][0].collectionId
             );
             console.log("collection found: ", collection);
+            const tokenName = `${collection?.name} ${nft[1][0].index}`;
+            const marmaladeTokenId = `t:${nft[1][0].hash}`;
+            await nftRepository.updateNameAndTokenId(
+              tokenName,
+              marmaladeTokenId,
+              nft[1][0].hash
+            );
             if (
               collection &&
               new Date().toISOString().split(".")[0] + "Z" >=
