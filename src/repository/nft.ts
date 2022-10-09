@@ -179,4 +179,25 @@ export class NFTRepository {
       return null;
     }
   }
+
+  async findAllMintedNFTs(offset: number, limit: number) {
+    let data: [NFT] | null = null;
+    try {
+      data = await this.nftRepository.findAll({
+        offset: offset,
+        limit: limit,
+        where: {
+          mintedAt: {
+            [Op.ne]: null,
+          },
+        },
+      });
+    } catch (err) {
+      this.logger.error(
+        "error occurred while retrieving minted nfts: " +
+          JSON.stringify(err.errors)
+      );
+    }
+    return data;
+  }
 }
