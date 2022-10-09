@@ -77,6 +77,8 @@ export class CollectionRepository {
       collection["imageUrl"] = imageUrl;
       collection["bannerImageUrl"] = bannerImageUrl;
       collection["numMinted"] = 0;
+      if (!collection["premint-price"])
+        collection["premint-price"] = collection["mint-price"];
       return await this.collectionsRespository.create(collection);
     } catch (err) {
       this.logger.error("Error::" + err);
