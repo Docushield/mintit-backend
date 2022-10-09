@@ -97,6 +97,18 @@ export class CollectionController {
     return;
   }
 
+  async getMintedNFTTokens(req: Request, res: Response) {
+    let limit = 10;
+    let offset = 0;
+    if (typeof req.query["limit"] == "string")
+      limit = parseInt(req.query["limit"]) || 10;
+    if (typeof req.query["offset"] == "string")
+      offset = parseInt(req.query["offset"]) || 10;
+    const nfts = await this.nftRepository.findAllMintedNFTs(offset, limit);
+    res.status(200).json(nfts);
+    return;
+  }
+
   async getNFTTokenByHash(req: Request, res: Response) {
     const slug = req.params["slug"];
     const hash = req.params["hash"];
