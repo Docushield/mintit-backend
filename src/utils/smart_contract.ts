@@ -157,7 +157,7 @@ export const checkMintTokenOnChain = async () => {
                 if (
                   listenTxResponse &&
                   listenTxResponse.result &&
-                  listenTxResponse.response.data
+                  listenTxResponse.result.data
                 ) {
                   nftRepository.updateRevealedAt(
                     nft[1][0].id,
