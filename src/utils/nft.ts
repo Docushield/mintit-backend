@@ -29,7 +29,9 @@ export const initNFTExpression = (
     collection["premint-whitelist"]
   )}, "size": ${collection.size}, "mint-price": ${collection[
     "mint-price"
-  ].toFixed(2)}, "sale-royalties": ${objCustomStringify(
+  ].toFixed(2)}, "premint-price": ${collection["premint-price"].toFixed(
+    2
+  )}, "sale-royalties": ${objCustomStringify(
     collection["sale-royalties"]
   )}, "mint-royalties": ${objCustomStringify(
     collection["mint-royalties"]
@@ -64,5 +66,7 @@ export const addNFTTokens = (name: string, tokens: [Token]) => {
   let tokenListHashes = tokens.map((val) => {
     return val.hash;
   });
-  return `(${contractNamespace}.${contractName}.add-nft-tokens "${name}" ${tokenListHashes})`;
+  return `(${contractNamespace}.${contractName}.add-nft-tokens "${name}" ${JSON.stringify(
+    tokenListHashes
+  )})`;
 };

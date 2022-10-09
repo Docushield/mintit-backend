@@ -16,16 +16,13 @@ export class NFTRepository {
     this.logger = new APILogger();
   }
 
-  async createNFT(
-    nft: {
-      collectionId: string;
-      owner: string | null;
-      spec: object;
-      hash: string;
-      contentUri: object;
-    },
-    res: Response | null
-  ) {
+  async createNFT(nft: {
+    collectionId: string;
+    owner: string | null;
+    spec: object;
+    hash: string;
+    contentUri: object;
+  }) {
     try {
       nft["createdAt"] = new Date().toISOString();
       nft["id"] = uuidv4();
@@ -35,13 +32,6 @@ export class NFTRepository {
       this.logger.error(
         "errors occurred while inserting nft:" + JSON.stringify(err.errors)
       );
-      if (res)
-        res
-          .status(500)
-          .json({
-            error: "error occurred while creating nft collection: ",
-            err,
-          });
       return;
     }
   }
@@ -52,9 +42,8 @@ export class NFTRepository {
     owner: string,
     mintedAt: number
   ) {
-    let data: [NFT] | null = null;
     try {
-      data = await this.nftRepository.update(
+      const data = await this.nftRepository.update(
         { mintedAt: mintedAt, index: index, owner: owner },
         {
           where: {
@@ -63,10 +52,11 @@ export class NFTRepository {
           returning: true,
         }
       );
+      return data;
     } catch (err) {
-      this.logger.error("Error::" + err);
+      this.logger.error("Error::" + JSON.stringify(err));
+      return null;
     }
-    return data;
   }
 
   async updateStatus(id: string, status: string, res: Response) {
@@ -78,6 +68,7 @@ export class NFTRepository {
           where: {
             id: id,
           },
+          returning: true,
         }
       );
     } catch (err) {
@@ -122,6 +113,21 @@ export class NFTRepository {
     return data;
   }
 
+  async findNFTByCollectionIdAndHash(id: string, hash: string) {
+    let data: NFT | null = null;
+    try {
+      data = await this.nftRepository.findOne({
+        where: {
+          collectionId: id,
+          hash: hash,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+
   async findLatestMintAt() {
     let data = 0;
     try {
@@ -148,10 +154,49 @@ export class NFTRepository {
           where: {
             id: id,
           },
+          returning: true,
         }
       );
     } catch (err) {
       this.logger.error("Error while updating reveledAt: " + err);
+    }
+    return data;
+  }
+  async updateNameAndTokenId(name: string, tokenId: string, hash: string) {
+    try {
+      const data = await this.nftRepository.update(
+        { name: name, "marmalade-token-id": tokenId },
+        {
+          where: {
+            hash: hash,
+          },
+          returning: true,
+        }
+      );
+      return data;
+    } catch (err) {
+      this.logger.error("Error::" + JSON.stringify(err));
+      return null;
+    }
+  }
+
+  async findAllMintedNFTs(offset: number, limit: number) {
+    let data: [NFT] | null = null;
+    try {
+      data = await this.nftRepository.findAll({
+        offset: offset,
+        limit: limit,
+        where: {
+          mintedAt: {
+            [Op.ne]: null,
+          },
+        },
+      });
+    } catch (err) {
+      this.logger.error(
+        "error occurred while retrieving minted nfts: " +
+          JSON.stringify(err.errors)
+      );
     }
     return data;
   }

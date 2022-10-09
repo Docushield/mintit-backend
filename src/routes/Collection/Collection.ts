@@ -44,6 +44,9 @@ router.get("/status/:id", (req: Request, res: Response) => {
 router.get("/reveal/:id", (req: Request, res: Response) => {
   collectionController.revealNFT(req, res);
 });
+router.get("/tokens", (req: Request, res: Response) => {
+  collectionController.getMintedNFTTokens(req, res);
+});
 
 router.get("/:slug", (req: Request, res: Response) => {
   collectionController.getCollection(req, res);
@@ -55,4 +58,8 @@ router.get("/", (req: Request, res: Response) => {
 
 router.get("/:slug/tokens", (req: Request, res: Response) => {
   collectionController.getNFTTokens(req, res);
+});
+
+router.get("/:slug/tokens/:hash", (req: Request, res: Response) => {
+  collectionController.getNFTTokenByHash(req, res);
 });

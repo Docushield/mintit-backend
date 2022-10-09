@@ -5,6 +5,24 @@ import { v4 as uuidv4 } from "uuid";
 import { Response } from "express";
 import { Op } from "sequelize";
 
+const restructureFields = (collection: Collection) => {
+  if (typeof collection["mint-royalties"] === "string") {
+    collection["mint-royalties"] = JSON.parse(collection["mint-royalties"]);
+  }
+  if (typeof collection["sale-royalties"] === "string") {
+    collection["sale-royalties"] = JSON.parse(collection["sale-royalties"]);
+  }
+  if (typeof collection["token-list"] === "string") {
+    collection["token-list"] = JSON.parse(collection["token-list"]);
+  }
+  if (typeof collection["premint-whitelist"] === "string") {
+    collection["premint-whitelist"] = JSON.parse(
+      collection["premint-whitelist"]
+    );
+  }
+  return collection;
+};
+
 export class CollectionRepository {
   private logger: APILogger;
   private db: any = {};
@@ -52,26 +70,15 @@ export class CollectionRepository {
         });
         return;
       }
-      if (typeof collection["mint-royalties"] === "string") {
-        collection["mint-royalties"] = JSON.parse(collection["mint-royalties"]);
-      }
-      if (typeof collection["sale-royalties"] === "string") {
-        collection["sale-royalties"] = JSON.parse(collection["sale-royalties"]);
-      }
-      if (typeof collection["token-list"] === "string") {
-        collection["token-list"] = JSON.parse(collection["token-list"]);
-      }
-      if (typeof collection["premint-whitelist"] === "string") {
-        collection["premint-whitelist"] = JSON.parse(
-          collection["premint-whitelist"]
-        );
-      }
+      collection = restructureFields(collection);
       collection["createdAt"] = new Date().toISOString();
       collection["id"] = uuidv4();
       collection["status"] = "pending";
       collection["imageUrl"] = imageUrl;
       collection["bannerImageUrl"] = bannerImageUrl;
       collection["numMinted"] = 0;
+      if (!collection["premint-price"])
+        collection["premint-price"] = collection["mint-price"];
       return await this.collectionsRespository.create(collection);
     } catch (err) {
       this.logger.error("Error::" + err);
@@ -101,6 +108,7 @@ export class CollectionRepository {
           where: {
             slug: slug,
           },
+          returning: true,
         }
       );
     } catch (err) {
@@ -113,12 +121,7 @@ export class CollectionRepository {
     return data;
   }
 
-  async updateStatus(
-    id: string,
-    status: string,
-    statusMessage: string,
-    res: Response
-  ) {
+  async updateStatus(id: string, status: string, statusMessage: string) {
     let data = {};
     try {
       data = await this.collectionsRespository.update(
@@ -127,14 +130,13 @@ export class CollectionRepository {
           where: {
             id: id,
           },
+          returning: true,
         }
       );
     } catch (err) {
-      this.logger.error("Error::" + err);
-      res.status(500).json({
-        error: "error occurred while updating collection status: ",
-        err,
-      });
+      this.logger.error(
+        "error occurred while updating status: " + JSON.stringify(err.errors)
+      );
     }
     return data;
   }
@@ -216,12 +218,44 @@ export class CollectionRepository {
           where: {
             id: id,
           },
+          returning: true,
         }
       );
     } catch (err) {
       this.logger.error(
         "error occurred while updating num minted: " + err.errors
       );
+    }
+    return data;
+  }
+
+  async updateWholeCollection(
+    collection: Collection,
+    imageUrl: string,
+    bannerImageUrl: string,
+    id: string,
+    res: Response
+  ) {
+    let data = {};
+    collection = restructureFields(collection);
+    collection["status"] = "pending";
+    collection["imageUrl"] = imageUrl;
+    collection["bannerImageUrl"] = bannerImageUrl;
+    try {
+      data = await this.collectionsRespository.update(collection, {
+        where: {
+          id: id,
+        },
+        returning: true,
+      });
+    } catch (err) {
+      this.logger.error(
+        "error occurred while updating whole collection: " +
+          JSON.stringify(err.errors)
+      );
+      res
+        .status(500)
+        .json({ error: "error occurred while updating collection: ", err });
     }
     return data;
   }

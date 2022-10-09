@@ -97,6 +97,40 @@ export class CollectionController {
     return;
   }
 
+  async getMintedNFTTokens(req: Request, res: Response) {
+    let limit = 10;
+    let offset = 0;
+    if (typeof req.query["limit"] == "string")
+      limit = parseInt(req.query["limit"]) || 10;
+    if (typeof req.query["offset"] == "string")
+      offset = parseInt(req.query["offset"]) || 10;
+    const nfts = await this.nftRepository.findAllMintedNFTs(offset, limit);
+    res.status(200).json(nfts);
+    return;
+  }
+
+  async getNFTTokenByHash(req: Request, res: Response) {
+    const slug = req.params["slug"];
+    const hash = req.params["hash"];
+    const collection = await this.collectionRepository.findCollectionBySlug(
+      slug
+    );
+    if (!collection) {
+      res.status(400).json({ error: "No Collection found." });
+      return;
+    }
+    const token = await this.nftRepository.findNFTByCollectionIdAndHash(
+      collection.id,
+      hash
+    );
+    if (!token) {
+      res.status(400).json({ error: "No token found." });
+      return;
+    }
+    res.status(200).json(token);
+    return;
+  }
+
   async revealNFT(req: Request, res: Response) {
     const tokenU = req.headers["x-auth-token"];
     const isAuthenticated = await this.authTokenRespository.validateToken(
@@ -190,15 +224,41 @@ export class CollectionController {
     }
     console.log("Response for uploading collection banner image: ", bannerResp);
     console.log("Response for uploading collection image: ", resp);
-    const collection = await this.collectionRepository.createCollection(
-      req.body,
-      resp,
-      bannerResp,
-      res
-    );
+    const existingCollection =
+      await this.collectionRepository.findCollectionBySlug(req.body.slug);
+    let collection;
+    if (existingCollection) {
+      if (existingCollection.status === "failure") {
+        const collectionE =
+          await this.collectionRepository.updateWholeCollection(
+            req.body,
+            resp,
+            bannerResp,
+            existingCollection.id,
+            res
+          );
+        collection = collectionE[1][0];
+      } else {
+        res
+          .status(400)
+          .json({ error: "collection already exists with same slug" });
+        return;
+      }
+    } else {
+      collection = await this.collectionRepository.createCollection(
+        req.body,
+        resp,
+        bannerResp,
+        res
+      );
+    }
     if (collection == null) return;
     const tokens = sliceIntoChunks(collection["token-list"], batch);
+    console.log("sliced the tokens into " + tokens.length + " batches");
     collection["token-list"] = tokens[0];
+    console.log(
+      "creating the collection with " + tokens[0].length + " tokens."
+    );
     const expression = NFT.initNFTExpression(req.body, collection);
     const txResponse = await Kadena.sendTx(expression.expr, expression.env);
     if (!txResponse) {
@@ -210,37 +270,39 @@ export class CollectionController {
     if (txResponse["requestKeys"]) {
       res.status(200).json({ slug: collection!.slug });
       for (const token of collection["token-list"]) {
-        const nftCollection = await this.nftRepository.createNFT(
-          {
-            collectionId: collection.id,
-            owner: null,
-            spec: token["spec"],
-            hash: token.hash,
-            contentUri: token["content_uri"],
-          },
-          res
-        );
-        if (!nftCollection) return;
+        const nftCollection = await this.nftRepository.createNFT({
+          collectionId: collection.id,
+          owner: null,
+          spec: token["spec"],
+          hash: token.hash,
+          contentUri: token["content_uri"],
+        });
+        console.log("here: ", nftCollection);
+        if (!nftCollection) {
+          const updatedCollection =
+            await this.collectionRepository.updateStatus(
+              collection.id,
+              "failure",
+              "unable to create nft with hash: " + token.hash
+            );
+          console.log(
+            "Updated the status to: ",
+            "failure",
+            " for: ",
+            collection.id
+          );
+          return;
+        }
       }
       // This will be happening async and try to init collection and update status
       // based on the response.rom blockchain
       const listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
-      if (!listenTxResponse) {
-        res.status(500).json({
-          error: "error while listening on transaction to blockchain",
-        });
-        return;
-      }
       let resp = listenTxResponse;
-      for (var i = 1; i < tokens.length; i++) {
-        resp = this.sendAddTokenAndListen(collection, tokens[i]);
-      }
-      if (resp) {
-        const updatedCollection = this.collectionRepository.updateStatus(
+      if (listenTxResponse.result.error) {
+        const updatedCollection = await this.collectionRepository.updateStatus(
           collection.id,
           resp.result.status,
-          resp.result.error ? resp.result.error.message : resp.result.data,
-          res
+          resp.result.error.message
         );
         if (!updatedCollection) return;
 
@@ -250,11 +312,57 @@ export class CollectionController {
           " for: ",
           collection!.id
         );
+        return;
       }
+      for (var i = 1; i < tokens.length; i++) {
+        resp = await this.sendAddTokenAndListen(collection, tokens[i]);
+      }
+      console.log(
+        "final response after successfully init the collection: ",
+        resp
+      );
+      if (resp && resp.result) {
+        const updatedCollection = await this.collectionRepository.updateStatus(
+          collection.id,
+          resp.result.status,
+          resp.result.error ? resp.result.error.message : "true"
+        );
+        if (!updatedCollection) return;
 
+        console.log(
+          "Updated the status to: ",
+          listenTxResponse.result.status,
+          " for: ",
+          collection.id
+        );
+      } else {
+        const updatedCollection = await this.collectionRepository.updateStatus(
+          collection.id,
+          "failure",
+          "unable to init nft on chain"
+        );
+        console.log(
+          "Updated the status to: ",
+          "failure",
+          " for: ",
+          collection.id
+        );
+      }
       return;
     } else {
-      res.status(500).json({ error: "unable to create the nft collection" });
+      const updatedCollection = await this.collectionRepository.updateStatus(
+        collection.id,
+        "failure",
+        "not able to connect to chain"
+      );
+      if (!updatedCollection) return;
+
+      console.log(
+        "Updated the status to: ",
+        "failure",
+        " for: ",
+        collection.id
+      );
     }
     return;
   }
@@ -264,22 +372,19 @@ export class CollectionController {
     const txResponse = await Kadena.sendTx(expr);
     if (txResponse["requestKeys"]) {
       for (const token of tokens) {
-        const nftCollection = await this.nftRepository.createNFT(
-          {
-            collectionId: collection.id,
-            owner: null,
-            spec: token["spec"],
-            hash: token.hash,
-            contentUri: token["content_uri"],
-          },
-          null
-        );
+        const nftCollection = await this.nftRepository.createNFT({
+          collectionId: collection.id,
+          owner: null,
+          spec: token["spec"],
+          hash: token.hash,
+          contentUri: token["content_uri"],
+        });
       }
       const listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
       return listenTxResponse;
     } else {
       console.log("Didn't found requestKeys in add tokens, hence retrying... ");
-      this.sendAddTokenAndListen(collection, tokens);
+      return this.sendAddTokenAndListen(collection, tokens);
     }
   };
 }
