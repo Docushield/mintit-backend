@@ -162,4 +162,21 @@ export class NFTRepository {
     }
     return data;
   }
+  async updateNameAndTokenId(name: string, tokenId: string, hash: string) {
+    try {
+      const data = await this.nftRepository.update(
+        { name: name, "marmalade-token-id": tokenId },
+        {
+          where: {
+            hash: hash,
+          },
+          returning: true,
+        }
+      );
+      return data;
+    } catch (err) {
+      this.logger.error("Error::" + JSON.stringify(err));
+      return null;
+    }
+  }
 }

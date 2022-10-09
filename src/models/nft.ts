@@ -44,6 +44,12 @@ export class NFT extends Model {
   @Column
   revealedAt: number;
 
+  @Column
+  name: string;
+
+  @Column
+  "marmalade-token-id": string;
+
   @Unique
   @AllowNull(false)
   @Column

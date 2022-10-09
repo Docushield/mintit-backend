@@ -266,7 +266,21 @@ export class CollectionController {
           contentUri: token["content_uri"],
         });
         console.log("here: ", nftCollection);
-        if (!nftCollection) return;
+        if (!nftCollection) {
+          const updatedCollection =
+            await this.collectionRepository.updateStatus(
+              collection.id,
+              "failure",
+              "unable to create nft with hash: " + token.hash
+            );
+          console.log(
+            "Updated the status to: ",
+            "failure",
+            " for: ",
+            collection.id
+          );
+          return;
+        }
       }
       // This will be happening async and try to init collection and update status
       // based on the response.rom blockchain
@@ -309,8 +323,19 @@ export class CollectionController {
           " for: ",
           collection.id
         );
+      } else {
+        const updatedCollection = await this.collectionRepository.updateStatus(
+          collection.id,
+          "failure",
+          "unable to init nft on chain"
+        );
+        console.log(
+          "Updated the status to: ",
+          "failure",
+          " for: ",
+          collection.id
+        );
       }
-
       return;
     } else {
       const updatedCollection = await this.collectionRepository.updateStatus(
