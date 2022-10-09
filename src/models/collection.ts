@@ -56,6 +56,9 @@ export class Collection extends Model {
   @Column
   "mint-price": number;
 
+  @Column
+  "premint-price": number;
+
   @Column(DataType.ARRAY(DataType.JSONB))
   "token-list": Token[];
 
