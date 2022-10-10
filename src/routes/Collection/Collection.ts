@@ -52,6 +52,11 @@ router.get("/:slug", (req: Request, res: Response) => {
   collectionController.getCollection(req, res);
 });
 
+router.get("/profile/:account", (req: Request, res: Response) => {
+  collectionController.getProfileCollection(req, res);
+});
+
+
 router.get("/", (req: Request, res: Response) => {
   collectionController.getCollections(req, res);
 });

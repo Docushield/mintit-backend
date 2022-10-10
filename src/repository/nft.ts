@@ -37,6 +37,7 @@ export class NFTRepository {
   }
 
   async updateMintedAtAndIndexWithOwner(
+    collectionId: string,
     hash: string,
     index: number,
     owner: string,
@@ -47,6 +48,7 @@ export class NFTRepository {
         { mintedAt: mintedAt, index: index, owner: owner },
         {
           where: {
+            collectionId: collectionId,
             hash: hash,
           },
           returning: true,
@@ -113,6 +115,20 @@ export class NFTRepository {
     return data;
   }
 
+  async findNFTByAccount(account: string) {
+    let data: NFT | null = null;
+    try {
+      data = await this.nftRepository.findAll({
+        where: {
+          owner: account,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+
   async findNFTByCollectionIdAndHash(id: string, hash: string) {
     let data: NFT | null = null;
     try {
@@ -162,12 +178,18 @@ export class NFTRepository {
     }
     return data;
   }
-  async updateNameAndTokenId(name: string, tokenId: string, hash: string) {
+  async updateNameAndTokenId(
+    name: string,
+    tokenId: string,
+    hash: string,
+    collectionId: string
+  ) {
     try {
       const data = await this.nftRepository.update(
         { name: name, "marmalade-token-id": tokenId },
         {
           where: {
+            collectionId: collectionId,
             hash: hash,
           },
           returning: true,

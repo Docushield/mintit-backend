@@ -155,6 +155,20 @@ export class CollectionRepository {
     return data;
   }
 
+  async findCollectionByAccount(account: string) {
+    let data: [Collection] | null = null;
+    try {
+      data = await this.collectionsRespository.findAll({
+        where: {
+          creator: account,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+
   async findCollectionBySlug(slug: string) {
     let data: Collection | null = null;
     try {
@@ -256,6 +270,31 @@ export class CollectionRepository {
       res
         .status(500)
         .json({ error: "error occurred while updating collection: ", err });
+    }
+    return data;
+  }
+
+  async updateRequestKey(id: string, requestKey: string) {
+    let data = {};
+    try {
+      data = await this.collectionsRespository.update(
+        { requestKey: requestKey },
+        {
+          where: {
+            id: id,
+          },
+          returning: true,
+        }
+      );
+    } catch (err) {
+      this.logger.error(
+        "error occurred while updating requestKey: " +
+          requestKey +
+          " for collectionid: " +
+          id +
+          " with error: " +
+          JSON.stringify(err.errors) || err
+      );
     }
     return data;
   }
