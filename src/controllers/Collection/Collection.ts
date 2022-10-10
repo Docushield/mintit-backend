@@ -73,14 +73,15 @@ export class CollectionController {
 
   async getProfileCollection(req: Request, res: Response) {
     const account = req.params["account"];
-    const collections = (await this.collectionRepository.findCollectionByAccount(account)) || [];
+    const collections =
+      (await this.collectionRepository.findCollectionByAccount(account)) || [];
     collections.map(function (collection) {
       collection["imageUrl"] = s3.buildUrl(collection["imageUrl"]);
       collection["bannerImageUrl"] = s3.buildUrl(collection["bannerImageUrl"]);
       collection["token-list"] = [];
     });
     const nfts = await this.nftRepository.findNFTByAccount(account);
-    res.status(200).json({"collections":collections,"nfts":nfts});
+    res.status(200).json({ collections: collections, nfts: nfts });
     return;
   }
 
@@ -281,6 +282,10 @@ export class CollectionController {
       return;
     }
     if (txResponse["requestKeys"]) {
+      await this.collectionRepository.updateRequestKey(
+        collection.id,
+        txResponse["requestKeys"][0]
+      );
       res.status(200).json({ slug: collection!.slug });
       for (const token of collection["token-list"]) {
         const nftCollection = await this.nftRepository.createNFT({
