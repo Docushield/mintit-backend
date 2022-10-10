@@ -289,7 +289,11 @@ export class CollectionRepository {
     } catch (err) {
       this.logger.error(
         "error occurred while updating requestKey: " +
-          JSON.stringify(err.errors)
+          requestKey +
+          " for collectionid: " +
+          id +
+          " with error: " +
+          JSON.stringify(err.errors) || err
       );
     }
     return data;
