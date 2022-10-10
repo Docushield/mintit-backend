@@ -155,6 +155,20 @@ export class CollectionRepository {
     return data;
   }
 
+  async findCollectionByAccount(account: string) {
+    let data: [Collection] | null = null;
+    try {
+      data = await this.collectionsRespository.findAll({
+        where: {
+          creator: account,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+
   async findCollectionBySlug(slug: string) {
     let data: Collection | null = null;
     try {
