@@ -178,12 +178,18 @@ export class NFTRepository {
     }
     return data;
   }
-  async updateNameAndTokenId(name: string, tokenId: string, hash: string) {
+  async updateNameAndTokenId(
+    name: string,
+    tokenId: string,
+    hash: string,
+    collectionId: string
+  ) {
     try {
       const data = await this.nftRepository.update(
         { name: name, "marmalade-token-id": tokenId },
         {
           where: {
+            collectionId: collectionId,
             hash: hash,
           },
           returning: true,

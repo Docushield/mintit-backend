@@ -139,7 +139,8 @@ export const checkMintTokenOnChain = async () => {
               await nftRepository.updateNameAndTokenId(
                 tokenName,
                 marmaladeTokenId,
-                nft[1][0].hash
+                nft[1][0].hash,
+                collection.id
               );
               if (
                 new Date().toISOString().split(".")[0] + "Z" >=
