@@ -273,4 +273,25 @@ export class CollectionRepository {
     }
     return data;
   }
+
+  async updateRequestKey(id: string, requestKey: string) {
+    let data = {};
+    try {
+      data = await this.collectionsRespository.update(
+        { requestKey: requestKey },
+        {
+          where: {
+            id: id,
+          },
+          returning: true,
+        }
+      );
+    } catch (err) {
+      this.logger.error(
+        "error occurred while updating requestKey: " +
+          JSON.stringify(err.errors)
+      );
+    }
+    return data;
+  }
 }

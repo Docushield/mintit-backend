@@ -37,6 +37,7 @@ export class NFTRepository {
   }
 
   async updateMintedAtAndIndexWithOwner(
+    collectionId: string,
     hash: string,
     index: number,
     owner: string,
@@ -47,6 +48,7 @@ export class NFTRepository {
         { mintedAt: mintedAt, index: index, owner: owner },
         {
           where: {
+            collectionId: collectionId,
             hash: hash,
           },
           returning: true,
