@@ -275,10 +275,13 @@ export class CollectionController {
     );
     const expression = NFT.initNFTExpression(req.body, collection);
     const txResponse = await Kadena.sendTx(expression.expr, expression.env);
-    if (!txResponse) {
-      res
-        .status(500)
-        .json({ error: "error while sending transaction to blockchain" });
+    if (!txResponse || !txResponse.data) {
+      res.status(500).json({
+        error:
+          "error while sending transaction to blockchain: " + txResponse.status
+            ? txResponse.status
+            : txResponse,
+      });
       return;
     }
     if (txResponse["requestKeys"]) {
