@@ -226,10 +226,13 @@ export class CollectionRepository {
     return data;
   }
 
-  async findAllCollections() {
+  async findAllCollections(limit: number, offset: number) {
     let data: [Collection] | null = null;
     try {
-      data = await this.collectionsRespository.findAll({});
+      data = await this.collectionsRespository.findAll({
+        offset: offset,
+        limit: limit,
+      });
     } catch (err) {
       this.logger.error("Error::" + err);
     }
