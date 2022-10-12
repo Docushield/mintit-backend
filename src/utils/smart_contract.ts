@@ -116,8 +116,8 @@ export const checkMintTokenOnChain = async () => {
       ) {
         console.log("Found our mint nft event: ", JSON.stringify(p));
         const obj = p.params[0];
-        const collection = await collectionRepository.findCollectionBySlug(
-          obj["collection-name"].replaceAll(" ", "-")
+        const collection = await collectionRepository.findCollectionByName(
+          obj["collection-name"]
         );
         if (collection) {
           console.log("collection found: ", collection);
