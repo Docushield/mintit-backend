@@ -111,18 +111,14 @@ export class CollectionController {
     return;
   }
 
-async getNFTHashes(req: Request, res: Response) {
+  async getNFTHashes(req: Request, res: Response) {
     const id = req.params["slug"];
     const nft = await this.collectionRepository.findCollectionBySlug(id);
     if (!nft) {
       res.status(400).json({ error: "No Collection found." });
       return;
     }
-    const nftHashes = await this.nftRepository.findHashesByCollectionId(nft.id);
-    if (!nftHashes) {
-        res.status(400).json({ error: "No NFT Hash found." });
-        return;
-      }
+    const nftHashes = nft["token-list"].map((t) => t.hash);
     res.status(200).json(nftHashes);
     return;
   }
