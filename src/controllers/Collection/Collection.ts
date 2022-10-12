@@ -111,7 +111,6 @@ export class CollectionController {
     return;
   }
 
-//
 async getNFTHashes(req: Request, res: Response) {
     const id = req.params["slug"];
     const nft = await this.collectionRepository.findCollectionBySlug(id);
@@ -124,11 +123,10 @@ async getNFTHashes(req: Request, res: Response) {
         res.status(400).json({ error: "No NFT Hash found." });
         return;
       }
-    const hashes = nftHashes["hash"];
-    res.status(200).json(hashes);
+    res.status(200).json(nftHashes);
     return;
   }
-//
+
   async getMintedNFTTokens(req: Request, res: Response) {
     let limit = 10;
     let offset = 0;
