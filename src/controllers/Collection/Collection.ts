@@ -61,7 +61,14 @@ export class CollectionController {
   }
 
   async getAllCollections(req: Request, res: Response) {
-    const nfts = (await this.collectionRepository.findAllCollections()) || [];
+    let limit = 20;
+    let offset = 0;
+    if (typeof req.query["limit"] == "string")
+      limit = parseInt(req.query["limit"]) || 20;
+    if (typeof req.query["offset"] == "string")
+      offset = parseInt(req.query["offset"]) || 0;
+    const nfts =
+      (await this.collectionRepository.findAllCollections(limit, offset)) || [];
     nfts.map(function (nft) {
       nft["imageUrl"] = s3.buildUrl(nft["imageUrl"]);
       nft["bannerImageUrl"] = s3.buildUrl(nft["bannerImageUrl"]);
