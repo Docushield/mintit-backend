@@ -115,21 +115,24 @@ export class NFTRepository {
     return data;
   }
 
-//
 async findHashesByCollectionId(id: string) {
     let data: [NFT] | null = null;
     try {
       data = await this.nftRepository.findAll({
+        attributes: [ "hash" ],
         where: {
           collectionId: id,
+          createdAt: {
+            [Op.ne]: null,
+          },
         },
       });
     } catch (err) {
       this.logger.error("Error::" + err);
     }
-    return !data;
+    return data;
   }
-//
+
   async findNFTByAccount(account: string) {
     let data: NFT | null = null;
     try {
