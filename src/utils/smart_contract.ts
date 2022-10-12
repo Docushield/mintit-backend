@@ -177,6 +177,26 @@ export const checkMintTokenOnChain = async () => {
                       nft[1][0].id,
                       listenTxResponse.metaData.blockHeight
                     );
+                  } else {
+                    console.log(
+                      "error occurred while reveal nft: ",
+                      listenTxResponse
+                    );
+                    if (
+                      listenTxResponse &&
+                      listenTxResponse.result &&
+                      listenTxResponse.result.error &&
+                      listenTxResponse.result.error.message ===
+                        "EXC_NFT_ALREADY_REVEALED"
+                    ) {
+                      console.log(
+                        "Already revealed hence updating the revealedAt to current block"
+                      );
+                      const updatedNft = await nftRepository.updateRevealedAt(
+                        nft[1][0].id,
+                        nft[1][0].mintedAt
+                      );
+                    }
                   }
                 }
               }
@@ -239,6 +259,21 @@ export const checkRevealTime = async () => {
             );
           } else {
             console.log("error occurred while reveal nft: ", listenTxResponse);
+            if (
+              listenTxResponse &&
+              listenTxResponse.result &&
+              listenTxResponse.result.error &&
+              listenTxResponse.result.error.message ===
+                "EXC_NFT_ALREADY_REVEALED"
+            ) {
+              console.log(
+                "Already revealed hence updating the revealedAt to current block"
+              );
+              const updatedNft = await nftRepository.updateRevealedAt(
+                nft.id,
+                nft.mintedAt
+              );
+            }
           }
         }
       }
