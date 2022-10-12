@@ -22,6 +22,8 @@ const mintTrackingBatchSize =
 const initBlockHeight =
   parseInt(process.env.INIT_BLOCK_HEIGHT || "2572069") || 2572069;
 
+const getMarmaladeTokenId = (name, index) => `t:${name}:${index}`;
+
 export const revealNft = (
   collection: Collection,
   token: {
@@ -33,7 +35,7 @@ export const revealNft = (
   }
 ) => {
   const tokenName = `${collection.name} ${token.index}`;
-  const marmaladeTokenId = `t:${token.hash}`;
+  const marmaladeTokenId = getMarmaladeTokenId(collection.name, token.index);
 
   const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
       "name": "${tokenName}",
@@ -135,7 +137,10 @@ export const checkMintTokenOnChain = async () => {
                 p.height
               );
               const tokenName = `${collection?.name} ${nft[1][0].index}`;
-              const marmaladeTokenId = `t:${nft[1][0].hash}`;
+              const marmaladeTokenId = getMarmaladeTokenId(
+                collection.name,
+                nft[1][0].index
+              );
               await nftRepository.updateNameAndTokenId(
                 tokenName,
                 marmaladeTokenId,
