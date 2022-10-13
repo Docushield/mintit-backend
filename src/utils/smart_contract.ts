@@ -22,6 +22,8 @@ const mintTrackingBatchSize =
 const initBlockHeight =
   parseInt(process.env.INIT_BLOCK_HEIGHT || "2572069") || 2572069;
 
+const getMarmaladeTokenId = (name, index) => `t:${name}:${index}`;
+
 export const revealNft = (
   collection: Collection,
   token: {
@@ -33,7 +35,7 @@ export const revealNft = (
   }
 ) => {
   const tokenName = `${collection.name} ${token.index}`;
-  const marmaladeTokenId = `t:${token.hash}`;
+  const marmaladeTokenId = getMarmaladeTokenId(collection.name, token.index);
 
   const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
       "name": "${tokenName}",
@@ -114,8 +116,8 @@ export const checkMintTokenOnChain = async () => {
       ) {
         console.log("Found our mint nft event: ", JSON.stringify(p));
         const obj = p.params[0];
-        const collection = await collectionRepository.findCollectionBySlug(
-          obj["collection-name"].replaceAll(" ", "-")
+        const collection = await collectionRepository.findCollectionByName(
+          obj["collection-name"]
         );
         if (collection) {
           console.log("collection found: ", collection);
@@ -135,7 +137,10 @@ export const checkMintTokenOnChain = async () => {
                 p.height
               );
               const tokenName = `${collection?.name} ${nft[1][0].index}`;
-              const marmaladeTokenId = `t:${nft[1][0].hash}`;
+              const marmaladeTokenId = getMarmaladeTokenId(
+                collection.name,
+                nft[1][0].index
+              );
               await nftRepository.updateNameAndTokenId(
                 tokenName,
                 marmaladeTokenId,
@@ -143,8 +148,8 @@ export const checkMintTokenOnChain = async () => {
                 collection.id
               );
               if (
-                new Date().toISOString().split(".")[0] + "Z" >=
-                collection["reveal-at"]
+                new Date().getTime() >=
+                new Date(collection["reveal-at"]).getTime()
               ) {
                 console.log(
                   "calling reveal for token with content hash: ",
@@ -172,6 +177,26 @@ export const checkMintTokenOnChain = async () => {
                       nft[1][0].id,
                       listenTxResponse.metaData.blockHeight
                     );
+                  } else {
+                    console.log(
+                      "error occurred while reveal nft: ",
+                      listenTxResponse
+                    );
+                    if (
+                      listenTxResponse &&
+                      listenTxResponse.result &&
+                      listenTxResponse.result.error &&
+                      listenTxResponse.result.error.message ===
+                        "EXC_NFT_ALREADY_REVEALED"
+                    ) {
+                      console.log(
+                        "Already revealed hence updating the revealedAt to current block"
+                      );
+                      const updatedNft = await nftRepository.updateRevealedAt(
+                        nft[1][0].id,
+                        nft[1][0].mintedAt
+                      );
+                    }
                   }
                 }
               }
@@ -234,6 +259,21 @@ export const checkRevealTime = async () => {
             );
           } else {
             console.log("error occurred while reveal nft: ", listenTxResponse);
+            if (
+              listenTxResponse &&
+              listenTxResponse.result &&
+              listenTxResponse.result.error &&
+              listenTxResponse.result.error.message ===
+                "EXC_NFT_ALREADY_REVEALED"
+            ) {
+              console.log(
+                "Already revealed hence updating the revealedAt to current block"
+              );
+              const updatedNft = await nftRepository.updateRevealedAt(
+                nft.id,
+                nft.mintedAt
+              );
+            }
           }
         }
       }

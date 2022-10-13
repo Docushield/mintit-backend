@@ -61,7 +61,14 @@ export class CollectionController {
   }
 
   async getAllCollections(req: Request, res: Response) {
-    const nfts = (await this.collectionRepository.findAllCollections()) || [];
+    let limit = 20;
+    let offset = 0;
+    if (typeof req.query["limit"] == "string")
+      limit = parseInt(req.query["limit"]) || 20;
+    if (typeof req.query["offset"] == "string")
+      offset = parseInt(req.query["offset"]) || 0;
+    const nfts =
+      (await this.collectionRepository.findAllCollections(limit, offset)) || [];
     nfts.map(function (nft) {
       nft["imageUrl"] = s3.buildUrl(nft["imageUrl"]);
       nft["bannerImageUrl"] = s3.buildUrl(nft["bannerImageUrl"]);
@@ -108,6 +115,18 @@ export class CollectionController {
     }
     const nftTokens = await this.nftRepository.findNFTByCollectionId(nft.id);
     res.status(200).json(nftTokens);
+    return;
+  }
+
+  async getNFTHashes(req: Request, res: Response) {
+    const id = req.params["slug"];
+    const nft = await this.collectionRepository.findCollectionBySlug(id);
+    if (!nft) {
+      res.status(400).json({ error: "No Collection found." });
+      return;
+    }
+    const nftHashes = nft["token-list"].map((t) => t.hash);
+    res.status(200).json(nftHashes);
     return;
   }
 
@@ -275,10 +294,11 @@ export class CollectionController {
     );
     const expression = NFT.initNFTExpression(req.body, collection);
     const txResponse = await Kadena.sendTx(expression.expr, expression.env);
-    if (!txResponse) {
-      res
-        .status(500)
-        .json({ error: "error while sending transaction to blockchain" });
+    if (!txResponse || (txResponse.status && txResponse.status == "timeout")) {
+      res.status(500).json({
+        error:
+          "error while sending transaction to blockchain: " + txResponse.status,
+      });
       return;
     }
     if (txResponse["requestKeys"]) {
