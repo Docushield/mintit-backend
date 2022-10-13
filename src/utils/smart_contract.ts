@@ -148,8 +148,8 @@ export const checkMintTokenOnChain = async () => {
                 collection.id
               );
               if (
-                new Date().toISOString().split(".")[0] + "Z" >=
-                collection["reveal-at"]
+                new Date().getTime() >=
+                new Date(collection["reveal-at"]).getTime()
               ) {
                 console.log(
                   "calling reveal for token with content hash: ",
