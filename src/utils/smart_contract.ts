@@ -160,7 +160,7 @@ export const checkMintTokenOnChain = async () => {
                 if (
                   txResponse == null ||
                   (txResponse.status && txResponse.status == "timeout") ||
-                  !txResponse.result
+                  !txResponse.requestKeys
                 ) {
                   console.log(
                     "error occurred while calling reveal for token: ",
