@@ -73,6 +73,7 @@ export class LoginController {
         res
       );
       if (authToken == null) {
+        res.status(400).json({ error: "Auth token is null" });
         return;
       }
       res.status(200).json({ token: token });
