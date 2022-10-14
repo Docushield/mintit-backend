@@ -297,7 +297,7 @@ export class CollectionController {
     if (
       !txResponse ||
       (txResponse.status && txResponse.status == "timeout") ||
-      !txResponse.result
+      !txResponse.requestKeys
     ) {
       res.status(500).json({
         error: "error while sending transaction to blockchain: ",
