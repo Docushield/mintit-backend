@@ -56,6 +56,11 @@ export class CollectionController {
       res.status(200).json(nft);
       return;
     }
+    const all = req.query["count"];
+    if (all == "true") {
+      const response = await this.collectionRepository.getCountOfCollections();
+      return res.status(200).json({ count: response });
+    }
     await this.getAllCollections(req, res);
     return;
   }

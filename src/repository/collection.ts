@@ -3,7 +3,7 @@ import { APILogger } from "../logger/api";
 import { Collection } from "../models/collection";
 import { v4 as uuidv4 } from "uuid";
 import { Response } from "express";
-import { Op } from "sequelize";
+import { Op, fn, col } from "sequelize";
 
 const restructureFields = (collection: Collection) => {
   if (typeof collection["mint-royalties"] === "string") {
@@ -233,6 +233,21 @@ export class CollectionRepository {
         offset: offset,
         limit: limit,
       });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+  async getCountOfCollections() {
+    let data: number = 0;
+    try {
+      data = await this.collectionsRespository.findAll({
+        attributes: [[fn("count", col("id")), "count"]],
+        raw: true,
+      });
+      console.log("data: ", data);
+      if (data && data[0] && data[0].count) data = data[0].count;
+      else data = 0;
     } catch (err) {
       this.logger.error("Error::" + err);
     }
