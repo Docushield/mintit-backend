@@ -157,7 +157,11 @@ export const checkMintTokenOnChain = async () => {
                 );
                 const txResponse = await revealNft(collection, nft[1][0]);
                 let requestKeys: string[] = new Array();
-                if (txResponse == null) {
+                if (
+                  txResponse == null ||
+                  (txResponse.status && txResponse.status == "timeout") ||
+                  !txResponse.result
+                ) {
                   console.log(
                     "error occurred while calling reveal for token: ",
                     obj["content-hash"]

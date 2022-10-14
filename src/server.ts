@@ -62,8 +62,13 @@ app.get("/", (req, res) => {
 });
 
 app.get("/throw", (req, res) => {
-  res.status(500).send("Welcome to typescript backend!");
+  throw Error("abcd");
 });
+app.use((error, req, res, next) => {
+  console.log("unhandled exception occurred: ", error);
+  res.status(500).send("INTERNAL_SERVER_ERROR");
+});
+
 app.use(expressErrorHandler(appsignal));
 
 // Server setup
