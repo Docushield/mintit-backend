@@ -115,11 +115,11 @@ export class NFTRepository {
     return data;
   }
 
-async findHashesByCollectionId(id: string) {
+  async findHashesByCollectionId(id: string) {
     let data: [NFT] | null = null;
     try {
       data = await this.nftRepository.findAll({
-        attributes: [ "hash" ],
+        attributes: ["hash"],
         where: {
           collectionId: id,
           createdAt: {
@@ -231,6 +231,7 @@ async findHashesByCollectionId(id: string) {
             [Op.ne]: null,
           },
         },
+        order: [["createdAt", "DESC"]],
       });
     } catch (err) {
       this.logger.error(

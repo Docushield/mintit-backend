@@ -56,6 +56,11 @@ export class CollectionController {
       res.status(200).json(nft);
       return;
     }
+    const all = req.query["count"];
+    if (all == "true") {
+      const response = await this.collectionRepository.getCountOfCollections();
+      return res.status(200).json({ count: response });
+    }
     await this.getAllCollections(req, res);
     return;
   }
@@ -294,10 +299,13 @@ export class CollectionController {
     );
     const expression = NFT.initNFTExpression(req.body, collection);
     const txResponse = await Kadena.sendTx(expression.expr, expression.env);
-    if (!txResponse || (txResponse.status && txResponse.status == "timeout")) {
+    if (
+      !txResponse ||
+      (txResponse.status && txResponse.status == "timeout") ||
+      !txResponse.requestKeys
+    ) {
       res.status(500).json({
-        error:
-          "error while sending transaction to blockchain: " + txResponse.status,
+        error: "error while sending transaction to blockchain: ",
       });
       return;
     }
