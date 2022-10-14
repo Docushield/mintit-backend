@@ -232,6 +232,7 @@ export class CollectionRepository {
       data = await this.collectionsRespository.findAll({
         offset: offset,
         limit: limit,
+        order: [["createdAt", "DESC"]],
       });
     } catch (err) {
       this.logger.error("Error::" + err);
