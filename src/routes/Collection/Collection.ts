@@ -56,7 +56,6 @@ router.get("/profile/:account", (req: Request, res: Response) => {
   collectionController.getProfileCollection(req, res);
 });
 
-
 router.get("/", (req: Request, res: Response) => {
   collectionController.getCollections(req, res);
 });
@@ -66,9 +65,13 @@ router.get("/:slug/tokens", (req: Request, res: Response) => {
 });
 
 router.get("/:slug/tokenHashes", (req: Request, res: Response) => {
-    collectionController.getNFTHashes(req, res);
-  });
+  collectionController.getNFTHashes(req, res);
+});
 
 router.get("/:slug/tokens/:hash", (req: Request, res: Response) => {
   collectionController.getNFTTokenByHash(req, res);
+});
+
+router.get("/retry/:name", (req: Request, res: Response) => {
+  collectionController.chunkAndAdd(req, res);
 });
