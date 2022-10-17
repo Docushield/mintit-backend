@@ -433,4 +433,52 @@ export class CollectionController {
       return this.sendAddTokenAndListen(collection, tokens);
     }
   };
+
+  chunkAndAdd = async (req: Request, res: Response) => {
+    const collectionName = req.params["name"];
+    const collection = await this.collectionRepository.findCollectionByName(
+      collectionName
+    );
+    if (!collection) {
+      console.log("collection not found in DB.");
+      res.status(400).json({ error: "No collection found in DB" });
+      return;
+    }
+    const tokens = sliceIntoChunks(collection["token-list"], batch);
+    console.log("sliced the tokens into " + tokens.length + " batches");
+    let resp;
+    for (var i = 1; i < tokens.length; i++) {
+      resp = await this.sendAddTokenAndListenDummy(collection, tokens[i]);
+      console.log("Response recieved for batch: " + i + " is: " + resp);
+    }
+    console.log(
+      "final response after successfully init the collection: ",
+      resp
+    );
+    res.status(200).json({ message: "Added batches for collection." });
+  };
+
+  sendAddTokenAndListenDummy = async (
+    collection: Collection,
+    tokens: [Token]
+  ) => {
+    const expr = NFT.addNFTTokens(collection.name, tokens);
+    const txResponse = await Kadena.sendTx(expr);
+    if (txResponse["requestKeys"]) {
+      for (const token of tokens) {
+        const nftCollection = await this.nftRepository.createNFT({
+          collectionId: collection.id,
+          owner: null,
+          spec: token["spec"],
+          hash: token.hash,
+          contentUri: token["content_uri"],
+        });
+      }
+      const listenTxResponse = await Kadena.listenTx(txResponse.requestKeys[0]);
+      return listenTxResponse;
+    } else {
+      console.log("Didn't found requestKeys in add tokens, hence retrying... ");
+      return this.sendAddTokenAndListen(collection, tokens);
+    }
+  };
 }
