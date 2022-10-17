@@ -230,6 +230,7 @@ export class CollectionRepository {
     let data: [Collection] | null = null;
     try {
       data = await this.collectionsRespository.findAll({
+        where: { status: "success" },
         offset: offset,
         limit: limit,
         order: [["createdAt", "DESC"]],
@@ -243,6 +244,7 @@ export class CollectionRepository {
     let data: number = 0;
     try {
       data = await this.collectionsRespository.findAll({
+        where: { status: "success" },
         attributes: [[fn("count", col("id")), "count"]],
         raw: true,
       });
