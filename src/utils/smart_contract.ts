@@ -13,6 +13,7 @@ import {
 import { NFTRepository } from "../repository/nft";
 import { CollectionRepository } from "../repository/collection";
 import Pact from "pact-lang-api";
+import { copyObjectWithSortedKeys } from "./serialize";
 
 export const contractNamespace = process.env.CONTRACT_NAMESPACE || "free";
 export const contractName = process.env.CONTRACT_NAME || "z74plc";
@@ -39,9 +40,9 @@ export const revealNft = (
 
   const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
       "name": "${tokenName}",
-      "description": "${collection.description} token description",
+      "description": "${collection.description}",
       "content-hash": "${token.hash}",
-      "spec": ${JSON.stringify(token.spec)},
+      "spec": ${JSON.stringify(copyObjectWithSortedKeys(token.spec))},
       "collection-name" :"${collection.name}",
       "content-uri": (kip.token-manifest.uri 
           "${token.contentUri.scheme}" 
