@@ -37,12 +37,13 @@ export const revealNft = (
 ) => {
   const tokenName = `${collection.name} ${token.index}`;
   const marmaladeTokenId = getMarmaladeTokenId(collection.name, token.index);
-
-  const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
+  const specString = JSON.stringify(copyObjectWithSortedKeys(token.spec));
+  if (token.hash === Pact.crypto.hash(specString)) {
+    const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
       "name": "${tokenName}",
       "description": "${collection.description}",
       "content-hash": "${token.hash}",
-      "spec": ${JSON.stringify(copyObjectWithSortedKeys(token.spec))},
+      "spec": ${specString},
       "collection-name" :"${collection.name}",
       "content-uri": (kip.token-manifest.uri 
           "${token.contentUri.scheme}" 
@@ -53,22 +54,31 @@ export const revealNft = (
       "creator": "${collection.creator}"
     })`;
 
-  const tokenOwner = token.owner;
+    const tokenOwner = token.owner;
 
-  const caps = [
-    mkCap("Gas Payer", "Gas Payer", "coin.GAS", []),
-    mkCap("Marmalade Mint", "Marmalade Mint", "marmalade.ledger.MINT", [
-      marmaladeTokenId,
-      tokenOwner,
-      1,
-    ]),
-  ];
+    const caps = [
+      mkCap("Gas Payer", "Gas Payer", "coin.GAS", []),
+      mkCap("Marmalade Mint", "Marmalade Mint", "marmalade.ledger.MINT", [
+        marmaladeTokenId,
+        tokenOwner,
+        1,
+      ]),
+    ];
 
-  const data = null;
+    const data = null;
 
-  const command = mkCmd(pactCode, data, caps);
+    const command = mkCmd(pactCode, data, caps);
 
-  return send({ cmds: [command] });
+    return send({ cmds: [command] });
+  } else {
+    console.log(
+      "hash mismatched while calling reveal, expected: " +
+        token.hash +
+        " got: " +
+        Pact.crypto.hash(specString)
+    );
+    return;
+  }
 };
 
 const nftRepository = new NFTRepository();
