@@ -103,7 +103,6 @@ export const checkMintTokenOnChain = async () => {
       );
     }
     const blockTo = chainBlockHeight;
-    lastBlockHeight = blockTo;
     console.log(
       "started listening on blockchain for latest mint events from: " +
         blockFrom +
@@ -238,6 +237,7 @@ export const checkMintTokenOnChain = async () => {
         }
       })
     );
+    lastBlockHeight = blockTo;
   } catch (err) {
     console.log("Exception occurred while listening on minting: ", err);
     return;
