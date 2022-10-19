@@ -24,9 +24,6 @@ const {
 
 const app = express();
 const PORT: Number = 8080;
-const pollInterval = parseInt(process.env.POLL_INTERVAL_SECONDS || "30") || 30;
-const revealPollInterval =
-  parseInt(process.env.REVEAL_POLL_INTERVAL_SECONDS || "600") || 600;
 
 // required for connect with testnet.
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -84,8 +81,8 @@ console.log(runEvents === "true");
 
 if (runEvents === "true") {
   // Listening on the blockchain for the events.
-  setInterval(checkMintTokenOnChain, pollInterval * 1000);
+  checkMintTokenOnChain();
 
   // Loop to check for any old tokens yet to be revealed and reveal them.
-  setInterval(checkRevealTime, revealPollInterval * 1000);
+  checkRevealTime();
 }
