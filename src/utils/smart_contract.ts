@@ -23,6 +23,10 @@ const mintTrackingBatchSize =
 const initBlockHeight =
   parseInt(process.env.INIT_BLOCK_HEIGHT || "2572069") || 2572069;
 
+const pollInterval = parseInt(process.env.POLL_INTERVAL_SECONDS || "30") || 30;
+const revealPollInterval =
+  parseInt(process.env.REVEAL_POLL_INTERVAL_SECONDS || "600") || 600;
+
 const getMarmaladeTokenId = (name, index) => `t:${name}:${index}`;
 
 export const revealNft = (
@@ -240,8 +244,8 @@ export const checkMintTokenOnChain = async () => {
     lastBlockHeight = blockTo;
   } catch (err) {
     console.log("Exception occurred while listening on minting: ", err);
-    return;
   }
+  setTimeout(checkMintTokenOnChain, pollInterval * 1000);
 };
 
 export const checkRevealTime = async () => {
@@ -306,8 +310,8 @@ export const checkRevealTime = async () => {
     }
   } catch (err) {
     console.log("Exception occurred while checking reveal time: ", err);
-    return;
   }
+  setTimeout(checkRevealTime, revealPollInterval * 1000);
 };
 
 export const getCollection = async (collectionName: string) => {
