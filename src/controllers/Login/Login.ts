@@ -64,22 +64,29 @@ export class LoginController {
     }>,
     res: Response
   ) {
-    const { account, command, signature } = req.body;
-
-    if (this.verifySignature(account, command, signature)) {
-      const token = uuidv4();
-      const authToken = await this.createAuthToken(
-        { account: account, token: token },
-        res
-      );
-      if (authToken == null) {
-        res.status(400).json({ error: "Auth token is null" });
+    try {
+      const { account, command, signature } = req.body;
+      console.log(" Request for login: ", req.body);
+      if (this.verifySignature(account, command, signature)) {
+        const token = uuidv4();
+        const authToken = await this.createAuthToken(
+          { account: account, token: token },
+          res
+        );
+        if (authToken == null) {
+          res.status(400).json({ error: "Auth token is null" });
+          return;
+        }
+        res.status(200).json({ token: token });
+        return;
+      } else {
+        res.status(401).json({ error: "signature validation failed" });
         return;
       }
-      res.status(200).json({ token: token });
+    } catch (err) {
+      console.log("Exception occurred in login flow: ", err);
+      res.status(500).json({ error: "INTERNAL_SERVER_ERROR" });
       return;
-    } else {
-      return res.status(401).json({ error: "signature validation failed" });
     }
   }
 
