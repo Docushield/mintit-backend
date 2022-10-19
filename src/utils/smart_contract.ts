@@ -86,213 +86,227 @@ const collectionRepository = new CollectionRepository();
 let lastBlockHeight = initBlockHeight;
 
 export const checkMintTokenOnChain = async () => {
-  const latestBlockHeight = await nftRepository.findLatestMintAt();
-  const blockFrom = Math.max(
-    initBlockHeight,
-    latestBlockHeight == 0
-      ? lastBlockHeight
-      : Math.min(lastBlockHeight, latestBlockHeight)
-  );
-  const cutResp = await cut();
-  let chainBlockHeight = blockFrom + mintTrackingBatchSize;
-  if (cutResp.hashes) {
-    chainBlockHeight = Math.min(
-      cutResp.hashes[`${chainId}`]["height"] || Number.MAX_SAFE_INTEGER,
-      chainBlockHeight
+  try {
+    const latestBlockHeight = await nftRepository.findLatestMintAt();
+    const blockFrom = Math.max(
+      initBlockHeight,
+      latestBlockHeight == 0
+        ? lastBlockHeight
+        : Math.min(lastBlockHeight, latestBlockHeight)
     );
-  }
-  const blockTo = chainBlockHeight;
-  lastBlockHeight = blockTo;
-  console.log(
-    "started listening on blockchain for latest mint events from: " +
-      blockFrom +
-      " to: " +
-      blockTo
-  );
-  const data = await Pact.event.range(
-    chainId,
-    blockFrom,
-    blockTo,
-    networkId,
-    apiHost
-  );
-  console.log("Found " + data.length + " events from blockchain");
-  await Promise.all(
-    data.map(async function (p) {
-      if (
-        p.module.name == contractName &&
-        p.module.namespace == contractNamespace &&
-        p.name == "MINT_NFT_EVENT" &&
-        p.params
-      ) {
-        console.log("Found our mint nft event: ", JSON.stringify(p));
-        const obj = p.params[0];
-        const collection = await collectionRepository.findCollectionByName(
-          obj["collection-name"]
-        );
-        if (collection) {
-          console.log("collection found: ", collection);
-          const nft = await nftRepository.updateMintedAtAndIndexWithOwner(
-            collection.id,
-            obj["content-hash"],
-            obj["mint-index"]["int"],
-            obj["current-owner"],
-            p.height
+    const cutResp = await cut();
+    let chainBlockHeight = blockFrom + mintTrackingBatchSize;
+    if (cutResp.hashes) {
+      chainBlockHeight = Math.min(
+        cutResp.hashes[`${chainId}`]["height"] || Number.MAX_SAFE_INTEGER,
+        chainBlockHeight
+      );
+    }
+    const blockTo = chainBlockHeight;
+    lastBlockHeight = blockTo;
+    console.log(
+      "started listening on blockchain for latest mint events from: " +
+        blockFrom +
+        " to: " +
+        blockTo
+    );
+    const data = await Pact.event.range(
+      chainId,
+      blockFrom,
+      blockTo,
+      networkId,
+      apiHost
+    );
+    console.log("Found " + data.length + " events from blockchain");
+    await Promise.all(
+      data.map(async function (p) {
+        if (
+          p.module.name == contractName &&
+          p.module.namespace == contractNamespace &&
+          p.name == "MINT_NFT_EVENT" &&
+          p.params
+        ) {
+          console.log("Found our mint nft event: ", JSON.stringify(p));
+          const obj = p.params[0];
+          const collection = await collectionRepository.findCollectionByName(
+            obj["collection-name"]
           );
-          if (nft) {
-            if (nft[0] >= 1) {
-              console.log(
-                "Updated minted at for nft with hash: ",
-                obj["content-hash"],
-                " with value: ",
-                p.height
-              );
-              const tokenName = `${collection?.name} ${nft[1][0].index}`;
-              const marmaladeTokenId = getMarmaladeTokenId(
-                collection.name,
-                nft[1][0].index
-              );
-              await nftRepository.updateNameAndTokenId(
-                tokenName,
-                marmaladeTokenId,
-                nft[1][0].hash,
-                collection.id
-              );
-              if (
-                new Date().getTime() >=
-                new Date(collection["reveal-at"]).getTime()
-              ) {
+          if (collection) {
+            console.log("collection found: ", collection);
+            const nft = await nftRepository.updateMintedAtAndIndexWithOwner(
+              collection.id,
+              obj["content-hash"],
+              obj["mint-index"]["int"],
+              obj["current-owner"],
+              p.height
+            );
+            if (nft) {
+              if (nft[0] >= 1) {
                 console.log(
-                  "calling reveal for token with content hash: ",
-                  obj["content-hash"]
+                  "Updated minted at for nft with hash: ",
+                  obj["content-hash"],
+                  " with value: ",
+                  p.height
                 );
-                const txResponse = await revealNft(collection, nft[1][0]);
-                let requestKeys: string[] = new Array();
+                const tokenName = `${collection?.name} ${nft[1][0].index}`;
+                const marmaladeTokenId = getMarmaladeTokenId(
+                  collection.name,
+                  nft[1][0].index
+                );
+                await nftRepository.updateNameAndTokenId(
+                  tokenName,
+                  marmaladeTokenId,
+                  nft[1][0].hash,
+                  collection.id
+                );
                 if (
-                  txResponse == null ||
-                  (txResponse.status && txResponse.status == "timeout") ||
-                  !txResponse.requestKeys
+                  new Date().getTime() >=
+                  new Date(collection["reveal-at"]).getTime()
                 ) {
                   console.log(
-                    "error occurred while calling reveal for token: ",
+                    "calling reveal for token with content hash: ",
                     obj["content-hash"]
                   );
-                } else {
-                  console.log(txResponse["requestKeys"]);
-                  requestKeys = requestKeys.concat(txResponse["requestKeys"]);
-                }
-                for (const requestKey of requestKeys) {
-                  const listenTxResponse = await listenTx(requestKey);
+                  const txResponse = await revealNft(collection, nft[1][0]);
+                  let requestKeys: string[] = new Array();
                   if (
-                    listenTxResponse &&
-                    listenTxResponse.result &&
-                    listenTxResponse.result.data
+                    txResponse == null ||
+                    (txResponse.status && txResponse.status == "timeout") ||
+                    !txResponse.requestKeys
                   ) {
-                    nftRepository.updateRevealedAt(
-                      nft[1][0].id,
-                      listenTxResponse.metaData.blockHeight
+                    console.log(
+                      "error occurred while calling reveal for token: ",
+                      obj["content-hash"]
                     );
                   } else {
-                    console.log(
-                      "error occurred while reveal nft: ",
-                      listenTxResponse
-                    );
+                    console.log(txResponse["requestKeys"]);
+                    requestKeys = requestKeys.concat(txResponse["requestKeys"]);
+                  }
+                  for (const requestKey of requestKeys) {
+                    const listenTxResponse = await listenTx(requestKey);
                     if (
                       listenTxResponse &&
                       listenTxResponse.result &&
-                      listenTxResponse.result.error &&
-                      listenTxResponse.result.error.message ===
-                        "EXC_NFT_ALREADY_REVEALED"
+                      listenTxResponse.result.data
                     ) {
-                      console.log(
-                        "Already revealed hence updating the revealedAt to current block"
-                      );
-                      const updatedNft = await nftRepository.updateRevealedAt(
+                      nftRepository.updateRevealedAt(
                         nft[1][0].id,
-                        nft[1][0].mintedAt
+                        listenTxResponse.metaData.blockHeight
                       );
+                    } else {
+                      console.log(
+                        "error occurred while reveal nft: ",
+                        listenTxResponse
+                      );
+                      if (
+                        listenTxResponse &&
+                        listenTxResponse.result &&
+                        listenTxResponse.result.error &&
+                        listenTxResponse.result.error.message ===
+                          "EXC_NFT_ALREADY_REVEALED"
+                      ) {
+                        console.log(
+                          "Already revealed hence updating the revealedAt to current block"
+                        );
+                        const updatedNft = await nftRepository.updateRevealedAt(
+                          nft[1][0].id,
+                          nft[1][0].mintedAt
+                        );
+                      }
                     }
                   }
                 }
-              }
-              const numMinted = await getCollection(collection.name);
-              if (numMinted)
-                await collectionRepository.updateNumMinted(
-                  collection.id,
-                  numMinted
+                const numMinted = await getCollection(collection.name);
+                if (numMinted)
+                  await collectionRepository.updateNumMinted(
+                    collection.id,
+                    numMinted
+                  );
+              } else {
+                console.log(
+                  "No token found with the hash: ",
+                  obj["content-hash"]
                 );
-            } else {
-              console.log(
-                "No token found with the hash: ",
-                obj["content-hash"]
-              );
+              }
             }
+          } else {
+            console.log(
+              "No Collection found for the slug: ",
+              obj["collection-name"].replaceAll(" ", "-")
+            );
           }
-        } else {
-          console.log(
-            "No Collection found for the slug: ",
-            obj["collection-name"].replaceAll(" ", "-")
-          );
         }
-      }
-    })
-  );
+      })
+    );
+  } catch (err) {
+    console.log("Exception occurred while listening on minting: ", err);
+    return;
+  }
 };
 
 export const checkRevealTime = async () => {
-  const collections =
-    (await collectionRepository.findCollectionLessThanReveal(
-      new Date().toString()
-    )) || [];
-  for (const collection of collections) {
-    const nfts =
-      (await nftRepository.findNFTByCollectionIdAndNullReveal(collection.id)) ||
-      [];
-    for (const nft of nfts) {
-      if (nft.mintedAt) {
-        const txResponse = await revealNft(collection, nft);
-        let requestKeys: string[] = new Array();
-        if (txResponse == null) {
-          console.log(
-            "error occurred while calling reveal for token: ",
-            nft.hash
-          );
-        } else {
-          console.log(txResponse["requestKeys"]);
-          requestKeys = requestKeys.concat(txResponse["requestKeys"]);
-        }
-        for (const requestKey of requestKeys) {
-          const listenTxResponse = await listenTx(requestKey);
-          if (
-            listenTxResponse &&
-            listenTxResponse.result &&
-            listenTxResponse.result.data
-          ) {
-            const updatedNft = await nftRepository.updateRevealedAt(
-              nft.id,
-              listenTxResponse.metaData.blockHeight
+  try {
+    const collections =
+      (await collectionRepository.findCollectionLessThanReveal(
+        new Date().toString()
+      )) || [];
+    for (const collection of collections) {
+      const nfts =
+        (await nftRepository.findNFTByCollectionIdAndNullReveal(
+          collection.id
+        )) || [];
+      for (const nft of nfts) {
+        if (nft.mintedAt) {
+          const txResponse = await revealNft(collection, nft);
+          let requestKeys: string[] = new Array();
+          if (txResponse == null) {
+            console.log(
+              "error occurred while calling reveal for token: ",
+              nft.hash
             );
           } else {
-            console.log("error occurred while reveal nft: ", listenTxResponse);
+            console.log(txResponse["requestKeys"]);
+            requestKeys = requestKeys.concat(txResponse["requestKeys"]);
+          }
+          for (const requestKey of requestKeys) {
+            const listenTxResponse = await listenTx(requestKey);
             if (
               listenTxResponse &&
               listenTxResponse.result &&
-              listenTxResponse.result.error &&
-              listenTxResponse.result.error.message ===
-                "EXC_NFT_ALREADY_REVEALED"
+              listenTxResponse.result.data
             ) {
-              console.log(
-                "Already revealed hence updating the revealedAt to current block"
-              );
               const updatedNft = await nftRepository.updateRevealedAt(
                 nft.id,
-                nft.mintedAt
+                listenTxResponse.metaData.blockHeight
               );
+            } else {
+              console.log(
+                "error occurred while reveal nft: ",
+                listenTxResponse
+              );
+              if (
+                listenTxResponse &&
+                listenTxResponse.result &&
+                listenTxResponse.result.error &&
+                listenTxResponse.result.error.message ===
+                  "EXC_NFT_ALREADY_REVEALED"
+              ) {
+                console.log(
+                  "Already revealed hence updating the revealedAt to current block"
+                );
+                const updatedNft = await nftRepository.updateRevealedAt(
+                  nft.id,
+                  nft.mintedAt
+                );
+              }
             }
           }
         }
       }
     }
+  } catch (err) {
+    console.log("Exception occurred while checking reveal time: ", err);
+    return;
   }
 };
 
