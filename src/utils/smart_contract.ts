@@ -125,7 +125,8 @@ export const checkMintTokenOnChain = async () => {
       data.map(async function (p) {
         if (
           p.module.name == contractName &&
-          p.module.namespace == contractNamespace &&
+          (p.module.namespace == contractNamespace ||
+            p.module.namespace == "free.mintit-policy-v2") && // this check is required for backward compatibility
           p.name == "MINT_NFT_EVENT" &&
           p.params
         ) {
