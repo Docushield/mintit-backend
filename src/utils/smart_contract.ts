@@ -151,6 +151,10 @@ export const checkMintTokenOnChain = async () => {
                   " with value: ",
                   p.height
                 );
+                if (nft[1][0].revealedAt) {
+                  console.log("Already revealed token: ", obj["content-hash"]);
+                  return;
+                }
                 const tokenName = `${collection?.name} ${nft[1][0].index}`;
                 const marmaladeTokenId = getMarmaladeTokenId(
                   collection.name,
