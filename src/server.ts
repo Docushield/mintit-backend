@@ -78,8 +78,14 @@ app.listen(PORT, () => {
   );
 });
 
-// Listening on the blockchain for the events.
-setInterval(checkMintTokenOnChain, pollInterval * 1000);
+const runEvents = process.env.RUN_EVENTS || "false";
 
-// Loop to check for any old tokens yet to be revealed and reveal them.
-setInterval(checkRevealTime, revealPollInterval * 1000);
+console.log(runEvents === "true");
+
+if (runEvents === "true") {
+  // Listening on the blockchain for the events.
+  setInterval(checkMintTokenOnChain, pollInterval * 1000);
+
+  // Loop to check for any old tokens yet to be revealed and reveal them.
+  setInterval(checkRevealTime, revealPollInterval * 1000);
+}
