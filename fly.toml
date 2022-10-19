@@ -1,6 +1,6 @@
-# fly.toml file generated for prod-mintit-backend on 2022-10-07T05:35:27+05:00
+# fly.toml file generated for v2-prod-mintit-backend on 2022-10-19T23:31:35+05:00
 
-#app = "prod-mintit-backend"
+# app = "v2-prod-mintit-backend"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
