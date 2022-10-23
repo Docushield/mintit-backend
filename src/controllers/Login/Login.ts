@@ -41,8 +41,11 @@ export class LoginController {
   ): boolean {
     const pubKey = this.getPublicKey(account);
     const commandJSON = JSON.parse(command);
-    // Unfortunate consequence of X-Wallet signing a triple-jsonified datetime
-    const nonce = JSON.parse(JSON.parse(commandJSON.nonce));
+    let nonce = JSON.parse(commandJSON.nonce);
+    try {
+      // Unfortunate consequence of X-Wallet signing a triple-jsonified datetime
+      nonce = JSON.parse(nonce);
+    } catch (err) {}
 
     // Check that the nonce is not older than 3600 seconds
     const now = Date.now();
