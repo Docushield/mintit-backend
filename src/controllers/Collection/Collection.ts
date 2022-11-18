@@ -83,6 +83,19 @@ export class CollectionController {
     return;
   }
 
+  async countProfileTokens(req: Request, res: Response) {
+    const account = req.body.account;
+    const slug = req.body.slug;
+    const nft = await this.collectionRepository.findCollectionBySlug(slug);
+    if (!nft) {
+      res.status(400).json({ error: "No Collection found." });
+      return;
+    }
+    const nftTokens = await this.nftRepository.countTokenByOwnerInCollection(nft.id,account);
+    res.status(200).json(nftTokens);
+    return;
+  }
+
   async getProfileCollection(req: Request, res: Response) {
     const account = req.params["account"];
     const collections =
