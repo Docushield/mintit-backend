@@ -226,11 +226,13 @@ export class CollectionController {
       let resp: string | null = null;
       if (files["collection_image"].length > 0) {
         const collectionImage = files["collection_image"][0];
-        resp = await s3.uploadFileByPath(collectionImage);
+        const image_name = `image-${req.body.slug}`
+        resp = await s3.uploadFileByPath(collectionImage,image_name);
       }
       if (files["collection_banner"].length > 0) {
         const bannerImage = files["collection_banner"][0];
-        bannerResp = await s3.uploadFileByPath(bannerImage);
+        const banner_name = `banner-${req.body.slug}`
+        bannerResp = await s3.uploadFileByPath(bannerImage,banner_name);
       }
       this.collectionRepository.updateCollectionImages(
         req.body.slug,
@@ -256,9 +258,11 @@ export class CollectionController {
     if (req.files) {
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       const collectionImage = files["collection_image"][0];
+      const image_name = `image-${req.body.slug}`
       const bannerImage = files["collection_banner"][0];
-      resp = await s3.uploadFileByPath(collectionImage);
-      bannerResp = await s3.uploadFileByPath(bannerImage);
+      const banner_name = `banner-${req.body.slug}`
+      resp = await s3.uploadFileByPath(collectionImage,image_name);
+      bannerResp = await s3.uploadFileByPath(bannerImage,banner_name);
     }
     console.log("Response for uploading collection banner image: ", bannerResp);
     console.log("Response for uploading collection image: ", resp);
