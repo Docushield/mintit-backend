@@ -66,9 +66,8 @@ export class AdminRepository {
       res.status(200).json({ message:"updated" });
       return status;
     } catch (err) {
-      this.logger.error(
-        "error occurred while updating status: " + JSON.stringify(err.errors)
-      );
+      this.logger.error("Error:, " +err);
+      res.status(400).json({ error: "not updated." });
     }
   }
 
