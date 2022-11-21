@@ -98,6 +98,21 @@ export class NFTRepository {
     return data;
   }
 
+  async countTokenByOwnerInCollection(id: string, account:string) {
+    let data = 0;
+    try {
+      data = await this.nftRepository.count({
+        where: {
+          collectionId: id,
+          owner: account,
+        },
+      });
+    } catch (err) {
+      this.logger.error("Error::" + err);
+    }
+    return data;
+  }
+
   async findNFTByCollectionId(id: string) {
     let data: [NFT] | null = null;
     try {
