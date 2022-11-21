@@ -4,6 +4,7 @@ import { Collection } from "../models/collection";
 import { v4 as uuidv4 } from "uuid";
 import { Response } from "express";
 import { Op, fn, col } from "sequelize";
+import { integer } from "aws-sdk/clients/cloudfront";
 
 const restructureFields = (collection: Collection) => {
   if (typeof collection["mint-royalties"] === "string") {
@@ -38,7 +39,8 @@ export class CollectionRepository {
     collection: Collection,
     imageUrl: string,
     bannerImageUrl: string,
-    res: Response
+    res: Response,
+    minting_limit:number
   ) {
     try {
       var missingFields = new Array();
@@ -77,6 +79,7 @@ export class CollectionRepository {
       collection["imageUrl"] = imageUrl;
       collection["bannerImageUrl"] = bannerImageUrl;
       collection["numMinted"] = 0;
+      collection["mintingLimit"] = minting_limit;
       if (!collection["premint-price"])
         collection["premint-price"] = collection["mint-price"];
       return await this.collectionsRespository.create(collection);

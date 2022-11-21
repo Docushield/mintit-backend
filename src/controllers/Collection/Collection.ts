@@ -291,7 +291,8 @@ export class CollectionController {
         req.body,
         resp,
         bannerResp,
-        res
+        res,
+        req.body.minting_limit
       );
     }
     if (collection == null) return;
