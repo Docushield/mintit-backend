@@ -3,6 +3,7 @@ import { TypedRequestBody } from "../../express";
 import { APILogger } from "../../logger/api";
 import { AuthTokenRepository } from "../../repository/authtoken";
 import { CollectionRepository } from "../../repository/collection";
+import { AdminRepository } from "../../repository/admin";
 import { NFTRepository } from "../../repository/nft";
 import { Collection, Token } from "../../models/collection";
 import { TokenStatus } from "../../models/authtoken";
@@ -20,14 +21,35 @@ const batch = parseInt(process.env.BATCH_SIZE || "1000") || 1000;
 export class CollectionController {
   private authTokenRespository: AuthTokenRepository;
   private collectionRepository: CollectionRepository;
+  private adminRepository: AdminRepository;
   private nftRepository: NFTRepository;
   private logger: APILogger;
 
   constructor() {
     this.authTokenRespository = new AuthTokenRepository();
     this.collectionRepository = new CollectionRepository();
+    this.adminRepository = new AdminRepository();
     this.nftRepository = new NFTRepository();
     this.logger = new APILogger();
+  }
+
+  async getStatus(req: Request, res: Response) {
+    const status = await this.adminRepository.getStatus();
+    if (!status) {
+      res.status(400).json({ error: "No data found." });
+      return;
+    }
+    res.status(200).json({ minting: status["minting"], collection: status['collection'] });
+    return;
+  }
+
+  updateStatus(req: TypedRequestBody<{
+    minting: string,
+    collection: string,
+    token: string
+  }>, res: Response) {
+    const { minting, collection, token} = req.body;
+    this.adminRepository.updateStatus(minting,collection,token,res);
   }
 
   async getCollectionStatus(req: Request, res: Response) {

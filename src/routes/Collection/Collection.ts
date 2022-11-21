@@ -80,3 +80,12 @@ router.get("/:slug/tokens/:hash", (req: Request, res: Response) => {
 router.get("/retry/:name", (req: Request, res: Response) => {
   collectionController.chunkAndAdd(req, res);
 });
+
+
+router.post("/get-status", (req: Request, res: Response) => {
+  collectionController.getStatus(req, res);
+});
+
+router.post("/update-status", (req: Request, res: Response) => {
+  collectionController.updateStatus(req, res);
+});
