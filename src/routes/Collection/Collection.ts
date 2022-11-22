@@ -6,7 +6,8 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 1000000000, files: 2, fieldSize: 25 * 1024 * 1024 },
   fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+    console.log(file.originalname);
+    if (!file.originalname.match(/\.(jpg|jpeg|png|JPG|JPEG|PNG)$/)) {
       return cb(new Error("Please upload a valid image file"));
     }
     cb(null, true);
