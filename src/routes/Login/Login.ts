@@ -12,3 +12,7 @@ router.post("/", (req: Request, res: Response) => {
 router.delete("/", (req: Request, res: Response) => {
   loginController.logout(req, res);
 });
+
+router.post("/admin", (req: Request, res: Response) => {
+  loginController.validateAdmin(req, res);
+});
