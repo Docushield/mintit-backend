@@ -2,17 +2,31 @@ import { Request, Response } from "express";
 import { TypedRequestBody } from "../../express";
 import { APILogger } from "../../logger/api";
 import { AuthTokenRepository } from "../../repository/authtoken";
-import { AuthToken } from "../../models/authtoken";
+import { AdminRepository } from "../../repository/admin";
 import { v4 as uuidv4 } from "uuid";
 import { crypto } from "pact-lang-api";
 
 export class LoginController {
   private authTokenRespository: AuthTokenRepository;
+  private adminRespository: AdminRepository;
   private logger: APILogger;
 
   constructor() {
     this.authTokenRespository = new AuthTokenRepository();
+    this.adminRespository = new AdminRepository();
     this.logger = new APILogger();
+  }
+
+  async validateAdmin(
+    req: TypedRequestBody<{
+      username: string,
+      password: string,
+    }>,
+    res: Response,
+
+  ) {
+    const { username, password } = req.body;
+    return await this.adminRespository.validateAdmin(username, password, res);
   }
 
   async createAuthToken(

@@ -3,6 +3,7 @@ import { TypedRequestBody } from "../../express";
 import { APILogger } from "../../logger/api";
 import { AuthTokenRepository } from "../../repository/authtoken";
 import { CollectionRepository } from "../../repository/collection";
+import { AdminRepository } from "../../repository/admin";
 import { NFTRepository } from "../../repository/nft";
 import { Collection, Token } from "../../models/collection";
 import { TokenStatus } from "../../models/authtoken";
@@ -20,14 +21,35 @@ const batch = parseInt(process.env.BATCH_SIZE || "1000") || 1000;
 export class CollectionController {
   private authTokenRespository: AuthTokenRepository;
   private collectionRepository: CollectionRepository;
+  private adminRepository: AdminRepository;
   private nftRepository: NFTRepository;
   private logger: APILogger;
 
   constructor() {
     this.authTokenRespository = new AuthTokenRepository();
     this.collectionRepository = new CollectionRepository();
+    this.adminRepository = new AdminRepository();
     this.nftRepository = new NFTRepository();
     this.logger = new APILogger();
+  }
+
+  async getStatus(req: Request, res: Response) {
+    const status = await this.adminRepository.getStatus();
+    if (!status) {
+      res.status(400).json({ error: "No data found." });
+      return;
+    }
+    res.status(200).json({ minting: status["minting"], collection: status['collection'] });
+    return;
+  }
+
+  updateStatus(req: TypedRequestBody<{
+    minting: string,
+    collection: string,
+    token: string
+  }>, res: Response) {
+    const { minting, collection, token} = req.body;
+    this.adminRepository.updateStatus(minting,collection,token,res);
   }
 
   async getCollectionStatus(req: Request, res: Response) {
@@ -80,6 +102,19 @@ export class CollectionController {
       nft["token-list"] = [];
     });
     res.status(200).json(nfts);
+    return;
+  }
+
+  async countProfileTokens(req: Request, res: Response) {
+    const account = req.body.account;
+    const slug = req.body.slug;
+    const nft = await this.collectionRepository.findCollectionBySlug(slug);
+    if (!nft) {
+      res.status(400).json({ error: "No Collection found." });
+      return;
+    }
+    const nftTokens = await this.nftRepository.countTokenByOwnerInCollection(nft.id,account);
+    res.status(200).json(nftTokens);
     return;
   }
 
@@ -226,11 +261,13 @@ export class CollectionController {
       let resp: string | null = null;
       if (files["collection_image"].length > 0) {
         const collectionImage = files["collection_image"][0];
-        resp = await s3.uploadFileByPath(collectionImage);
+        const image_name = `image-${req.body.slug}`
+        resp = await s3.uploadFileByPath(collectionImage,image_name);
       }
       if (files["collection_banner"].length > 0) {
         const bannerImage = files["collection_banner"][0];
-        bannerResp = await s3.uploadFileByPath(bannerImage);
+        const banner_name = `banner-${req.body.slug}`
+        bannerResp = await s3.uploadFileByPath(bannerImage,banner_name);
       }
       this.collectionRepository.updateCollectionImages(
         req.body.slug,
@@ -256,9 +293,11 @@ export class CollectionController {
     if (req.files) {
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       const collectionImage = files["collection_image"][0];
+      const image_name = `image-${req.body.slug}`
       const bannerImage = files["collection_banner"][0];
-      resp = await s3.uploadFileByPath(collectionImage);
-      bannerResp = await s3.uploadFileByPath(bannerImage);
+      const banner_name = `banner-${req.body.slug}`
+      resp = await s3.uploadFileByPath(collectionImage,image_name);
+      bannerResp = await s3.uploadFileByPath(bannerImage,banner_name);
     }
     console.log("Response for uploading collection banner image: ", bannerResp);
     console.log("Response for uploading collection image: ", resp);
@@ -287,7 +326,8 @@ export class CollectionController {
         req.body,
         resp,
         bannerResp,
-        res
+        res,
+        req.body.minting_limit
       );
     }
     if (collection == null) return;

@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
 import { AuthToken } from "./models/authtoken";
+import { Admin } from "./models/admin";
 import { Collection } from "./models/collection";
 import { NFT } from "./models/nft";
 
@@ -28,7 +29,7 @@ export const connect = () => {
     logging: true,
   });
 
-  sequelize.addModels([AuthToken, Collection, NFT]);
+  sequelize.addModels([AuthToken, Collection, NFT, Admin]);
 
   const db: any = {};
   db.Sequelize = Sequelize;

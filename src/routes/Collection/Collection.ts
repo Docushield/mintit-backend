@@ -6,7 +6,8 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 1000000000, files: 2, fieldSize: 25 * 1024 * 1024 },
   fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+    console.log(file.originalname);
+    if (!file.originalname.match(/\.(jpg|jpeg|png|JPG|JPEG|PNG)$/)) {
       return cb(new Error("Please upload a valid image file"));
     }
     cb(null, true);
@@ -44,6 +45,7 @@ router.get("/status/:id", (req: Request, res: Response) => {
 router.get("/reveal/:id", (req: Request, res: Response) => {
   collectionController.revealNFT(req, res);
 });
+
 router.get("/tokens", (req: Request, res: Response) => {
   collectionController.getMintedNFTTokens(req, res);
 });
@@ -54,6 +56,10 @@ router.get("/:slug", (req: Request, res: Response) => {
 
 router.get("/profile/:account", (req: Request, res: Response) => {
   collectionController.getProfileCollection(req, res);
+});
+
+router.post("/profile/count-tokens", (req: Request, res: Response) => {
+  collectionController.countProfileTokens(req, res);
 });
 
 router.get("/", (req: Request, res: Response) => {
@@ -74,4 +80,13 @@ router.get("/:slug/tokens/:hash", (req: Request, res: Response) => {
 
 router.get("/retry/:name", (req: Request, res: Response) => {
   collectionController.chunkAndAdd(req, res);
+});
+
+
+router.post("/get-status", (req: Request, res: Response) => {
+  collectionController.getStatus(req, res);
+});
+
+router.post("/update-status", (req: Request, res: Response) => {
+  collectionController.updateStatus(req, res);
 });

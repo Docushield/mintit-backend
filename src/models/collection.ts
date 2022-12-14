@@ -94,6 +94,10 @@ export class Collection extends Model {
 
   @Column
   requestKey: string;
+
+  @Column
+  mintingLimit: number;
+
 }
 
 type MintRoyalties = {

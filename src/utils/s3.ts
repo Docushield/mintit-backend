@@ -47,12 +47,11 @@ export const getFile = async (key: string) => {
   );
 };
 
-export const uploadFileByPath = async (multerFile: Express.Multer.File) => {
-  const client = new AWS.S3();
+export const uploadFileByPath = async (multerFile: Express.Multer.File,slugName:string) => {
   const content = multerFile.buffer;
   console.log("Image content buffer size: ", content.length);
   return uploadFile({
-    key: multerFile.originalname,
+    key: slugName,
     content: content,
     type: multerFile.mimetype,
   });
