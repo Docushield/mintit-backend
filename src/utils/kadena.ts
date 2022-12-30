@@ -119,8 +119,13 @@ const apiGet = async (route) =>
 
 export const cut = async () => await (await apiGet("cut")).json();
 
-export const send = async (payload) =>
-  await (await apiPost("send", payload)).json();
+export const send = async (payload) => {
+  const resp = await apiPost("send", payload);
+  console.log("SEND RESP :", resp);
+  const parsed_resp = await resp.json();
+  console.log("PARSED RESP :", parsed_resp);
+  return parsed_resp;
+}
 
 export const local = async (payload) => {
   const resp = await await apiPost("local", payload);
