@@ -40,7 +40,8 @@ export const revealNft = (
   }
 ) => {
   const tokenName = `${collection.name} ${token.index}`;
-  const marmaladeTokenId = getMarmaladeTokenId(collection.name, token.index);
+  // const marmaladeTokenId = getMarmaladeTokenId(collection.name, token.index);
+  const marmaladeTokenId = `t:${token.hash}`;
   const specString = JSON.stringify(copyObjectWithSortedKeys(token.spec));
   if (token.hash === Pact.crypto.hash(specString)) {
     const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
@@ -157,10 +158,11 @@ export const checkMintTokenOnChain = async () => {
                   return;
                 }
                 const tokenName = `${collection?.name} ${nft[1][0].index}`;
-                const marmaladeTokenId = getMarmaladeTokenId(
-                  collection.name,
-                  nft[1][0].index
-                );
+                // const marmaladeTokenId = getMarmaladeTokenId(
+                //   collection.name,
+                //   nft[1][0].index
+                // );
+                const marmaladeTokenId = `t:${nft[1][0].hash}`;
                 await nftRepository.updateNameAndTokenId(
                   tokenName,
                   marmaladeTokenId,
