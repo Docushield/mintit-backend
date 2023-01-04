@@ -95,6 +95,7 @@ let lastBlockHeight = initBlockHeight;
         ];
         const data = null;
         const command = mkCmd(pactCode, data, caps);
+        console.log(JSON.stringify(command));
         return send({ cmds: [command] });
       } else {
         console.log(
