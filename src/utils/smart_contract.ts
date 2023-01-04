@@ -27,6 +27,10 @@ const pollInterval = parseInt(process.env.POLL_INTERVAL_SECONDS || "30") || 30;
 const revealPollInterval =
   parseInt(process.env.REVEAL_POLL_INTERVAL_SECONDS || "600") || 600;
 
+const nftRepository = new NFTRepository();
+const collectionRepository = new CollectionRepository();
+let lastBlockHeight = initBlockHeight;
+
   export const revealNft = async (
     collection: Collection,
     token: {
@@ -105,10 +109,6 @@ const revealPollInterval =
       return;
     }
   };
-
-const nftRepository = new NFTRepository();
-const collectionRepository = new CollectionRepository();
-let lastBlockHeight = initBlockHeight;
 
 export const checkMintTokenOnChain = async () => {
   try {
@@ -332,8 +332,6 @@ export const checkRevealTime = async () => {
 
 export const getCollection = async (collectionName: string) => {
   const pactCode = `(${contractNamespace}.${contractName}.get-nft-collection "${collectionName}")`;
-
-  console.log(pactCode);
   const resp = await localTx(pactCode);
   if (resp && resp.result && resp.result.data) {
     console.log("Response from local: ", resp.result.data["num-minted"].int);
