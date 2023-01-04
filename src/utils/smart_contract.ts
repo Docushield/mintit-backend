@@ -27,24 +27,21 @@ const pollInterval = parseInt(process.env.POLL_INTERVAL_SECONDS || "30") || 30;
 const revealPollInterval =
   parseInt(process.env.REVEAL_POLL_INTERVAL_SECONDS || "600") || 600;
 
-const getMarmaladeTokenId = (name, index) => `t:${name}:${index}`;
-
-export const revealNft = (
-  collection: Collection,
-  token: {
-    hash: string;
-    spec: object;
-    contentUri: { scheme: string; data: string };
-    index: number;
-    owner: string;
-  }
-) => {
-  const tokenName = `${collection.name} ${token.index}`;
-  // const marmaladeTokenId = getMarmaladeTokenId(collection.name, token.index);
-  const marmaladeTokenId = `t:${token.hash}`;
-  const specString = JSON.stringify(copyObjectWithSortedKeys(token.spec));
-  if (token.hash === Pact.crypto.hash(specString)) {
-    const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
+  export const revealNft = async (
+    collection: Collection,
+    token: {
+      hash: string;
+      spec: object;
+      contentUri: { scheme: string; data: string };
+      index: number;
+      owner: string;
+    }
+  ) => {
+    const tokenName = `${collection.name} ${token.index}`;
+    const specString =  JSON.stringify(copyObjectWithSortedKeys(token.spec));
+  
+    // create manifest to get marmalade token id, also use this manifest in reveal token
+    const pactCode = `(${contractNamespace}.${contractName}.create-manifest {
       "name": "${tokenName}",
       "description": "${collection.description}",
       "content-hash": "${token.hash}",
@@ -54,37 +51,60 @@ export const revealNft = (
           "${token.contentUri.scheme}" 
           "${token.contentUri.data}"
         ),
-      "marmalade-token-id": "${marmaladeTokenId}",
       "edition": 1,
       "creator": "${collection.creator}"
     })`;
-
-    const tokenOwner = token.owner;
-
-    const caps = [
-      mkCap("Gas Payer", "Gas Payer", "coin.GAS", []),
-      mkCap("Marmalade Mint", "Marmalade Mint", "marmalade.ledger.MINT", [
+    const resp = await localTx(pactCode);
+    if (resp && resp.result && resp.result.data) {
+      const token_manifest = resp.result.data;
+      const marmaladeTokenId = `t:${token_manifest.hash}`;
+      await nftRepository.updateNameAndTokenId(
+        tokenName,
         marmaladeTokenId,
-        tokenOwner,
-        1,
-      ]),
-    ];
-
-    const data = null;
-
-    const command = mkCmd(pactCode, data, caps);
-
-    return send({ cmds: [command] });
-  } else {
-    console.log(
-      "hash mismatched while calling reveal, expected: " +
-        token.hash +
-        " got: " +
-        Pact.crypto.hash(specString)
-    );
-    return;
-  }
-};
+        token.hash,
+        collection.id
+      );
+      const manifestString = JSON.stringify(token_manifest);
+      if (token.hash === Pact.crypto.hash(specString)) {
+        const pactCode = `(${contractNamespace}.${contractName}.reveal-nft {
+          "name": "${tokenName}",
+          "description": "${collection.description}",
+          "content-hash": "${token.hash}",
+          "spec": ${specString},
+          "marmalade-token-id": "${marmaladeTokenId}",
+          "collection-name" :"${collection.name}",
+          "content-uri": (kip.token-manifest.uri 
+              "${token.contentUri.scheme}" 
+              "${token.contentUri.data}"
+            ),
+          "edition": 1,
+          "creator": "${collection.creator}"
+        } ${manifestString})`;
+        const tokenOwner = token.owner;
+        const caps = [
+          mkCap("Gas Payer", "Gas Payer", "coin.GAS", []),
+          mkCap("Marmalade Mint", "Marmalade Mint", "marmalade.ledger.MINT", [
+            marmaladeTokenId,
+            tokenOwner,
+            1,
+          ]),
+        ];
+        const data = null;
+        const command = mkCmd(pactCode, data, caps);
+        return send({ cmds: [command] });
+      } else {
+        console.log(
+          "hash mismatched while calling reveal, expected: " +
+            token.hash +
+            " got: " +
+            Pact.crypto.hash(specString)
+        );
+        return;
+      }
+    }else{
+      return;
+    }
+  };
 
 const nftRepository = new NFTRepository();
 const collectionRepository = new CollectionRepository();
@@ -133,6 +153,7 @@ export const checkMintTokenOnChain = async () => {
         ) {
           console.log("Found our mint nft event: ", JSON.stringify(p));
           const obj = p.params[0];
+          console.log("Found NFT to be revealed", JSON.stringify(obj));
           const collection = await collectionRepository.findCollectionByName(
             obj["collection-name"]
           );
@@ -157,18 +178,6 @@ export const checkMintTokenOnChain = async () => {
                   console.log("Already revealed token: ", obj["content-hash"]);
                   return;
                 }
-                const tokenName = `${collection?.name} ${nft[1][0].index}`;
-                // const marmaladeTokenId = getMarmaladeTokenId(
-                //   collection.name,
-                //   nft[1][0].index
-                // );
-                const marmaladeTokenId = `t:${nft[1][0].hash}`;
-                await nftRepository.updateNameAndTokenId(
-                  tokenName,
-                  marmaladeTokenId,
-                  nft[1][0].hash,
-                  collection.id
-                );
                 if (
                   new Date().getTime() >=
                   new Date(collection["reveal-at"]).getTime()
